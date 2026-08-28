@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitch TTS Bot - OBS Panel</title>
+  <link rel="stylesheet" href="css/micro-panel.css">
+</head>
+<body>
+
+  <!-- HEADER MICRO -->
+  <header class="micro-header">
+    <div class="logo-wrap">
+      <span>Twitch TTS</span>
+      <span class="logo-badge">OBS</span>
+    </div>
+    
+    <div class="header-actions">
+      <div id="twitchStatusBadge" class="status-badge">
+        <span class="dot"></span>
+        <span id="twitchStatusText">Desconectado</span>
+      </div>
+      <button id="btnToggleMute" class="btn-icon" title="Silenciar / Activar TTS">
+        🔊
+      </button>
+    </div>
+  </header>
+
+  <!-- NAVEGACIÓN TABS -->
+  <nav class="micro-nav">
+    <div class="nav-tab active" data-target="tab-control">🎮 Control</div>
+    <div class="nav-tab" data-target="tab-voice">🎙️ Voz</div>
+    <div class="nav-tab" data-target="tab-twitch">🟣 Twitch & Filtros</div>
+  </nav>
+
+  <!-- CONTENEDOR DE VISTAS -->
+  <main class="view-container">
+
+    <!-- TAB 1: CONTROL EN VIVO -->
+    <section id="tab-control" class="tab-content active">
+      
+      <!-- Reproductor actual -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🔊 Reproduciendo Ahora</span>
+          <span id="queueCounterBadge" class="status-badge">0 en cola</span>
+        </div>
+
+        <div id="playerBox" class="player-box">
+          <div id="playerEmpty" class="player-empty">Esperando mensajes del chat...</div>
+          <div id="nowPlayingContent" class="now-playing" style="display: none;">
+            <div class="user-tag">
+              <span id="playingUserRole" class="user-role-badge">USER</span>
+              <span id="playingUsername" style="color: var(--accent);">Usuario</span>
+            </div>
+            <div id="playingMessage" class="user-message">"Mensaje de prueba"</div>
+          </div>
+        </div>
+
+        <div class="queue-controls">
+          <button id="btnSkip" class="btn">⏭️ Saltar</button>
+          <button id="btnClearQueue" class="btn btn-danger">🗑️ Vaciar Cola</button>
+        </div>
+      </div>
+
+      <!-- Cola de Espera -->
+      <div class="card">
+        <div class="card-header">
+          <span>Próximos en Cola</span>
+        </div>
+        <div id="queueList" class="queue-list">
+          <div class="player-empty" style="padding: 10px 0;">No hay mensajes en espera</div>
+        </div>
+      </div>
+
+      <!-- Test Rápido de TTS -->
+      <div class="card">
+        <div class="card-header">
+          <span>Test Rápido</span>
+        </div>
+        <div class="input-group">
+          <input type="text" id="inputTestText" class="input-text" placeholder="Escribe algo para probar...">
+          <button id="btnTestSpeak" class="btn btn-primary" style="white-space: nowrap;">Probar</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 2: CONFIGURACIÓN DE VOZ -->
+    <section id="tab-voice" class="tab-content">
+      
+      <div class="card">
+        <div class="card-header">
+          <span>Motor de Voz</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="selectTtsEngine">Proveedor de Voz</label>
+          <select id="selectTtsEngine">
+            <option value="native">Nativo (Navegador / Sistema)</option>
+            <option value="google">Google Translate TTS (Online)</option>
+          </select>
+        </div>
+
+        <div id="nativeVoicesGroup" class="form-group">
+          <label class="form-label" for="selectVoice">Voz del Sistema</label>
+          <select id="selectVoice">
+            <option value="">Cargando voces...</option>
+          </select>
+        </div>
+
+        <div id="googleLangGroup" class="form-group" style="display: none;">
+          <label class="form-label" for="selectGoogleLang">Idioma Google</label>
+          <select id="selectGoogleLang">
+            <option value="es">Español</option>
+            <option value="es-US">Español (Latinoamérica)</option>
+            <option value="en">Inglés</option>
+            <option value="ja">Japonés</option>
+            <option value="pt">Portugués</option>
+            <option value="fr">Francés</option>
+            <option value="it">Italiano</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Sliders de Audio -->
+      <div class="card">
+        <div class="card-header">
+          <span>Ajustes de Sonido</span>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Volumen</span>
+            <span id="valVolume">100%</span>
+          </div>
+          <input type="range" id="rangeVolume" min="0" max="1" step="0.05" value="1">
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <span>Velocidad (Speed)</span>
+            <span id="valRate">1.0x</span>
+          </div>
+          <input type="range" id="rangeRate" min="0.5" max="2.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="slider-group" id="pitchSliderGroup">
+          <div class="slider-header">
+            <span>Tono (Pitch)</span>
+            <span id="valPitch">1.0</span>
+          </div>
+          <input type="range" id="rangePitch" min="0.5" max="2.0" step="0.1" value="1.0">
+        </div>
+      </div>
+
+      <!-- Opciones de Lectura -->
+      <div class="card">
+        <div class="card-header">
+          <span>Formato de Lectura</span>
+        </div>
+
+        <label class="switch-label">
+          <span>Leer nombre del usuario</span>
+          <input type="checkbox" id="chkReadUsername" checked>
+        </label>
+
+        <div class="form-group" id="usernameTemplateGroup">
+          <label class="form-label" for="inputUsernameTemplate">Plantilla de nombre</label>
+          <input type="text" id="inputUsernameTemplate" class="input-text" value="{user} dice ">
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TAB 3: TWITCH & FILTROS -->
+    <section id="tab-twitch" class="tab-content">
+      
+      <!-- Canal de Twitch -->
+      <div class="card">
+        <div class="card-header">
+          <span>Canal de Twitch</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inputTwitchChannel">Nombre del Canal</label>
+          <div class="input-group">
+            <input type="text" id="inputTwitchChannel" class="input-text" placeholder="Ej: tu_canal">
+            <button id="btnConnectTwitch" class="btn btn-primary">Conectar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comandos & Permisos -->
+      <div class="card">
+        <div class="card-header">
+          <span>Disparador & Permisos</span>
+        </div>
+
+        <label class="switch-label">
+          <span>Requerir comando en chat</span>
+          <input type="checkbox" id="chkRequireCommand" checked>
+        </label>
+
+        <div class="form-group" id="commandInputGroup">
+          <label class="form-label" for="inputTtsCommand">Comando</label>
+          <input type="text" id="inputTtsCommand" class="input-text" value="!tts">
+        </div>
+
+        <div class="form-group" style="margin-top: 4px;">
+          <span class="form-label">¿Quién puede usar TTS?</span>
+          <div class="checkbox-grid">
+            <label class="checkbox-label"><input type="checkbox" id="roleAll" checked> Todos (Viewers)</label>
+            <label class="checkbox-label"><input type="checkbox" id="roleSubs" checked> Suscriptores</label>
+            <label class="checkbox-label"><input type="checkbox" id="roleVips" checked> VIPs</label>
+            <label class="checkbox-label"><input type="checkbox" id="roleMods" checked> Moderadores</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros & Moderación -->
+      <div class="card">
+        <div class="card-header">
+          <span>Filtros y Anti-Spam</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inputCooldown">Cooldown por usuario (segundos)</label>
+          <input type="number" id="inputCooldown" class="input-text" min="0" max="300" value="5">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inputMaxChars">Límite máximo de caracteres</label>
+          <input type="number" id="inputMaxChars" class="input-text" min="10" max="500" value="200">
+        </div>
+
+        <label class="switch-label">
+          <span>Omitir enlaces web (URLs)</span>
+          <input type="checkbox" id="chkFilterUrls" checked>
+        </label>
+
+        <label class="switch-label">
+          <span>🤖 Ignorar bots (StreamElements, Nightbot, etc.)</span>
+          <input type="checkbox" id="chkIgnoreBots" checked>
+        </label>
+
+        <div class="form-group">
+          <label class="form-label" for="inputIgnoredUsers">Otros Bots / Usuarios a ignorar</label>
+          <input type="text" id="inputIgnoredUsers" class="input-text" placeholder="nombre1, nombre2 (separados por coma)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inputBlacklist">Palabras Prohibidas (separadas por coma)</label>
+          <textarea id="inputBlacklist" rows="2" class="input-text" placeholder="palabra1, palabra2, insulto..."></textarea>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER CON ACCESO RÁPIDO PARA OBS -->
+  <footer class="micro-footer">
+    <span>Para Browser Source en OBS:</span>
+    <span id="btnCopyOverlayUrl" class="obs-link-copy" title="Copiar URL del Overlay">Copiar Overlay URL</span>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="js/tts-engine.js"></script>
+  <script src="js/twitch-chat.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+# Configuración con tokens / credenciales privadas
+Overlay-principal/Widget-chat/js/config.js
+Overlay-despedida/js/config.js
+Overlay-inicio/js/config.js
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores e IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependencias y logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

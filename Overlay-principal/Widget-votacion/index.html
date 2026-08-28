@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>GameVote Statistics - Dynamic View</title>
+    <!-- Font: Space Grotesk -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS v3 with Plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- BEGIN: Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#f27f0d', // Theme orange
+                            secondary: '#ef4444', // Red accent
+                            dark: '#0f172a',
+                            card: 'rgba(30, 41, 59, 0.5)' 
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'full': '9999px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: transparent !important;
+            color: #f8fafc;
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .game-card {
+            transition: transform 0.4s ease, border-color 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .progress-bar-glow {
+            box-shadow: 0 0 15px rgba(242, 127, 13, 0.4);
+        }
+
+        .progress-fill {
+            transition: width 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-card {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="font-sans flex items-center justify-center min-h-screen">
+
+<main class="w-full max-w-7xl px-6 py-4">
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-10" id="voting-grid">
+        
+        <!-- Mafia Card -->
+        <article id="card-mafia" class="bg-brand-card rounded-[2.5rem] overflow-hidden border border-white/10 flex flex-col game-card relative h-[650px]">
+            <div class="absolute inset-0 z-0">
+                <img alt="Mafia" class="w-full h-full object-cover" src="img/Mafia-1.png"/>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-8 flex flex-col z-10 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent">
+                <h3 class="text-3xl font-bold mb-6 text-white">Mafia</h3>
+                
+                <div class="w-full bg-slate-800/80 rounded-full h-10 relative overflow-hidden border border-white/10 mb-2">
+                    <div id="bar-mafia" class="bg-brand-primary h-full rounded-full progress-fill progress-bar-glow" style="width: 0%"></div>
+                    <span id="txt-mafia" class="absolute inset-0 flex items-center justify-center text-sm font-bold text-white">0%</span>
+                </div>
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center font-black">VOTOS ACTUALES</p>
+            </div>
+        </article>
+
+        <!-- Mafia 2 Card -->
+        <article id="card-mafia2" class="bg-brand-card rounded-[2.5rem] overflow-hidden border border-white/10 flex flex-col game-card relative h-[650px]">
+            <div class="absolute inset-0 z-0">
+                <img alt="Mafia 2" class="w-full h-full object-cover object-top" src="img/mafia_ii_edicion_definitiva.jpg"/>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-8 flex flex-col z-10 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent">
+                <h3 class="text-3xl font-bold mb-6 text-white">Mafia 2</h3>
+                
+                <div class="w-full bg-slate-800/80 rounded-full h-10 relative overflow-hidden border border-white/10 mb-2">
+                    <div id="bar-mafia2" class="bg-brand-secondary h-full rounded-full progress-fill" style="width: 0%"></div>
+                    <span id="txt-mafia2" class="absolute inset-0 flex items-center justify-center text-sm font-bold text-white">0%</span>
+                </div>
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center font-black">VOTOS ACTUALES</p>
+            </div>
+        </article>
+
+        <!-- Uncharted Card -->
+        <article id="card-uncharted" class="bg-brand-card rounded-[2.5rem] overflow-hidden border border-white/10 flex flex-col game-card relative h-[650px]">
+            <div class="absolute inset-0 z-0">
+                <img alt="Uncharted: El Legado Perdido" class="w-full h-full object-cover" src="img/uncharted-el-legado-perdido.jpg"/>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 p-8 flex flex-col z-10 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent">
+                <h3 class="text-3xl font-bold mb-6 text-white">Uncharted</h3>
+                
+                <div class="w-full bg-slate-800/80 rounded-full h-10 relative overflow-hidden border border-white/10 mb-2">
+                    <div id="bar-uncharted" class="bg-brand-primary h-full rounded-full progress-fill progress-bar-glow" style="width: 0%"></div>
+                    <span id="txt-uncharted" class="absolute inset-0 flex items-center justify-center text-sm font-bold text-white">0%</span>
+                </div>
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 text-center font-black">VOTOS ACTUALES</p>
+            </div>
+        </article>
+    </section>
+
+    <!-- Reset Section -->
+    <div class="mt-12 flex justify-center">
+        <button id="reset-votes" class="px-6 py-2 bg-white/5 hover:bg-red-500/20 text-slate-500 hover:text-red-400 border border-white/10 hover:border-red-500/30 rounded-full text-xs font-bold tracking-widest uppercase transition-all">
+            Reiniciar Votaciones
+        </button>
+    </div>
+</main>
+
+<script src="main.js"></script>
+
+</body>
+</html>

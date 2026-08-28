@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Twitch Chat Overlay - Cyberpunk 2077</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CSS Modular - Importa todos los componentes -->
+  <link rel="stylesheet" href="css/bundle.css">
+  <link rel="stylesheet" href="css/achievements.css?v=9">
+  <link rel="stylesheet" href="css/idle-stats.css">
+  <link rel="stylesheet" href="css/levelup.css">
+  <link rel="icon" href="data:,">
+</head>
+
+<body>
+  <!-- Cyberpunk Level Up Overlay (Global Position) -->
+  <div id="cp-levelup-overlay" class="cp-levelup-overlay">
+    <div class="cp-levelup-content">
+      <div class="cp-levelup-icon">
+        <svg class="cp-hex-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <polygon points="50 0, 95 25, 95 75, 50 100, 5 75, 5 25" />
+        </svg>
+        <div class="cp-hex-arrows">
+          <span>^</span>
+          <span>^</span>
+          <span>^</span>
+        </div>
+      </div>
+      <div class="cp-levelup-bar">
+        <div class="cp-levelup-main-text">
+          <span class="cp-level-arrow">▲</span>
+          <span id="cp-new-level" class="cp-level-number">66</span>
+          <span class="cp-level-text">LEVEL UP!</span>
+          <div class="cp-level-decor-right">
+            <svg class="cp-level-decor-icon" viewBox="0 0 24 24">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+            </svg>
+          </div>
+        </div>
+        <div class="cp-levelup-sub-bar">
+          <div class="cp-stat-box">
+            <span class="cp-stat-icon">👤</span>
+            <span class="cp-stat-label">MERC:</span>
+            <span id="cp-username" class="cp-stat-value">NETRUNNER</span>
+          </div>
+          <div class="cp-stat-box">
+            <span class="cp-stat-icon">◤</span>
+            <span class="cp-stat-label">NEW RANK:</span>
+            <span id="cp-new-title" class="cp-stat-value">ROOKIE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-wrapper">
+    <div class="social-title-stack">
+      <div class="social-links-title">
+        <img src="img/Discord.png" class="social-logo" alt="Discord">
+        <span>Mithands</span>
+      </div>
+      <div class="social-links-title">
+        <img src="img/youtube-logo.webp" class="social-logo" alt="YouTube">
+        <span>@Mithands-yt</span>
+      </div>
+      <div class="social-links-title">
+        <img src="img/logo-naranja x.png" class="social-logo" alt="Logo">
+        <span>@Mithandsx</span>
+      </div>
+    </div>
+    <div class="social-divider"></div>
+    <div class="container" role="region" aria-label="Chat de Twitch">
+
+      <!-- Animated border glow -->
+      <div class="border-glow"></div>
+
+      <!-- Status bar top -->
+      <div class="status-bar">
+        <span class="status-text" id="system-status-text">SYS.ONLINE</span>
+        <span class="status-divider">|</span>
+        <span class="status-code" id="stream-category">CHAT.STREAM</span>
+      </div>
+
+      <!-- Header with username -->
+      <div class="header">
+        <div class="info-container">
+          <!-- XP System Display (Moved to Top) -->
+          <div class="xp-section" id="xp-section"
+            style="margin-top: -10px; margin-bottom: 8px; border-top: none; border-bottom: 1px solid rgba(255, 140, 0, 0.2);">
+            <!-- Level Up Notification -->
+            <div class="xp-levelup-inline" id="xp-levelup-inline">
+              <span class="levelup-star">★</span>
+              <span class="levelup-text">LEVEL UP</span>
+              <span class="levelup-chevrons">❯❯❯</span>
+              <span class="levelup-number" id="levelup-number">2</span>
+            </div>
+
+            <!-- XP Bar -->
+            <div class="xp-bar-inline" id="xp-bar-inline">
+              <div class="xp-level-container">
+                <span class="xp-level-label">LVL</span>
+                <span class="xp-level-value" id="xp-level">1</span>
+              </div>
+              <div class="xp-progress-container">
+                <div class="xp-progress-bar">
+                  <div class="xp-progress-ghost" id="xp-progress-ghost"></div>
+                  <div class="xp-progress-fill" id="xp-progress-fill"></div>
+                  <div class="xp-progress-glow"></div>
+                </div>
+                <div class="xp-progress-text">
+                  <span class="xp-current" id="xp-current">0</span>
+                  <span class="xp-divider">/</span>
+                  <span class="xp-next" id="xp-next">100</span>
+                  <span class="xp-suffix">XP</span>
+                </div>
+              </div>
+              <div class="xp-gain-container" id="xp-gain-container"></div>
+            </div>
+
+            <!-- XP Title -->
+            <div class="xp-title-inline" id="xp-title-inline">
+              <span class="xp-title-icon">◆</span>
+              <span class="xp-title-text" id="xp-title">CODEX</span>
+              <span class="xp-streak" id="xp-streak" style="display: none;"></span>
+            </div>
+          </div>
+
+          <div class="title-row">
+            <span class="mission-icon">!</span>
+            <img id="admin-icon" src="img/Mithands.png" class="admin-icon" alt="Corp">
+            <span class="driver-name" id="username" data-text="NETRUNNER">NETMITHANDS</span>
+
+            <div class="user-identity-stack">
+              <span class="user-badge" id="user-badge"></span>
+            </div>
+          </div>
+
+
+        </div>
+
+      </div>
+
+      <!-- Data stream indicator -->
+      <div class="data-stream">
+        <div class="stream-line"></div>
+      </div>
+
+      <!-- Digital Particles BG (Top Users) -->
+      <div id="particles-bg" class="particles-bg"></div>
+
+      <!-- Equalizer / Audio visualizer (generado dinámicamente por UIUtils.initEqualizer) -->
+      <div class="equalizer" id="equalizer" aria-hidden="true"></div>
+
+      <!-- Message display -->
+      <div class="quote" id="message" role="status" aria-live="polite">
+        "Conectando al stream de Night City..."
+      </div>
+
+
+
+      <!-- Achievement Notifications (Dentro del widget) -->
+      <div class="achievement-notifications" id="achievement-notifications"></div>
+
+      <!-- Achievement Counter (Absolute position near footer) -->
+      <div class="xp-achievements-container" id="xp-achievements-container-wrapper" style="
+        position: absolute;
+        bottom: 0px; 
+        left: 0;
+        width: 100%;
+        padding: 0 15px;
+        padding-bottom: 4px; 
+        box-sizing: border-box;
+        z-index: 10;
+        pointer-events: none;
+      ">
+        <span class="xp-achievements" id="xp-achievements" style="display: none;"></span>
+        <!-- Watch Time: Bottom Right Pegado al Borde -->
+        <div id="watch-time-container" style="display: none;"></div>
+      </div>
+
+      <!-- Footer tech info -->
+      <div class="footer-tech">
+      </div>
+    </div>
+  </div>
+
+  <!-- 
+    Panel de Pruebas ELIMINADO de este archivo.
+    Ahora disponible en: test-panel.html
+    
+    Para testear el widget, abre test-panel.html en el navegador.
+    El panel cargará el widget en un iframe y permitirá simular mensajes.
+  -->
+
+  <!-- Scripts externos -->
+  <script src="https://cdn.jsdelivr.net/npm/regenerator-runtime@0.13.7/runtime.min.js"></script>
+  <script src="libs/tmi.min.js"></script>
+
+  <!-- Aplicación principal (ES Module) -->
+  <script type="module" src="js/app.js"></script>
+
+  <!-- Fallback para navegadores sin JavaScript -->
+  <noscript>
+    <div style="text-align: center; padding: 20px; color: white;">
+      Este overlay requiere JavaScript para funcionar.
+    </div>
+  </noscript>
+</body>
+
+</html>

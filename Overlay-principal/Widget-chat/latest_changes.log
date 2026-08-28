@@ -1,0 +1,50 @@
+[2026-02-09 / 2026-02-10] CHANGE LOG - Cyberpunk Chat Overlay
+
+1. ADMIN BRANDING UPDATE:
+   - Replaced Arasaka logo with dedicated Mithands icon (Mithands.png).
+   - Applied changes to:
+     * js/config.js: Updated SPECIAL_ICONS.
+     * index.html: Updated default admin-icon src.
+     * js/managers/UIManager.js: Updated fallback icon logic.
+     * css/bundle.css: Updated .icon-arasaka background image.
+
+2. CUSTOM USER BACKGROUNDS (Visual System):
+   - User 'mithands': Added custom background (mithands-bg) using Mithands.png.
+   - User 'ractor09': Added custom background (ractor09-bg) using Sevilla.jpg.
+   - User 'test': Added dedicated custom background (test-bg) using Sevilla1.png.
+   - User 'liiukiin': Added custom background (liiukiin-bg) using Liiukiin.png.
+   - UIManager.js: Updated cleanup and assignment logic for all new bg classes.
+   - bundle.css: Added CSS rules and header-hiding logic for new background classes.
+
+3. TEST PANEL ENHANCEMENTS (test-panel.html):
+   - UI Update: Added 'img/fondo_pruebas2.png' as the main background for the test panel page.
+   - Visibility: Made the 1080p preview container transparent to allow seeing the background image behind the widget.
+   - Controls: Added a new quick-test button for the user 'Test'.
+   - Safety: Removed the "RESET ALL XP" button to prevent accidental data loss.
+
+4. LOGIC REFACTORS:
+   - Decoupled 'Test' user background logic from 'ractor09' to allow independent styling.
+   - Updated search/replacement of image extensions (.jpg to .png) according to assets availability.
+
+5. AUDIO SYSTEM UPDATES:
+   - Renamed Sevilla anthem file to 'himno-sevilla.mp3'.
+   - Updated AudioManager.js:
+     * New sound 'sevilla' added to session-specific logic.
+     * Special logic: First message from user 'test' in a session plays the Sevilla anthem instead of standard notification.
+     * Integrated with 'stream:statusChanged' to reset flags on stream start.
+
+6. NIGHTINGALE CATEGORY & ACHIEVEMENTS:
+   - Added new achievement category: 'nightingale'.
+   - New Achievement: 'Bienvenido a Nightingale' (id: nightingale_first_contact).
+   - Stats: Integrated tracking for 'nightingaleMessages' in AchievementService.js.
+   - Image: Configured dedicated image 'img/logros/Nightingale_first.png'.
+   - Multi-Game Expansion: Added welcome achievements for: Rust, Apex Legends, SCUM, Star Wars Outlaws, ARC Raiders, and Minecraft.
+   - Tracking: Each game now has its own message counter to trigger the "Bienvenido a..." achievement on first message.
+
+7. TEST PANEL & SIMULATION UPDATES:
+   - Category Switcher: Added dropdown to test different game categories (Just Chatting, Nightingale, Cyberpunk, Witcher, Rust, Apex, SCUM, SW Outlaws, ARC Raiders, Minecraft).
+   - Selective Simulation: Logic updated so ONLY the 'Test', 'test2' and 'test3' users detect the category selected in the panel.
+   - UI Cleanup: Removed specific buttons for 'Ractor09', 'Takeru_xiii', 'Urimas82', 'C_h_a_n_d_a_l_f', and 'Liiukiin' from the panel for a cleaner interface.
+   - New Test User: Added 'test2' and 'test3' buttons for additional simulation cases.
+   - Technical: Implemented postMessage bridge for per-message category injection via extraTags.
+

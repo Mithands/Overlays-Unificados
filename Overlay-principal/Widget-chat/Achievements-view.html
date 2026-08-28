@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Twitch Achievements Overlay - Standalone View</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/achievements-view.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <!-- Contenedor de Alertas de Logros (Cyberpunk 2077 HUD) -->
+  <div id="achievements-viewport" class="achievements-viewport" role="status" aria-live="polite"></div>
+
+  <!-- Controlador de alertas independiente -->
+  <script src="js/achievements-view-app.js"></script>
+
+  <noscript>
+    <div style="color: #ff0055; font-family: monospace; padding: 20px;">
+      [ERROR] Se requiere JavaScript para visualizar las alertas de logros.
+    </div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#993df5",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#191022",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Header / Top Bar -->
+<header class="flex items-center justify-between p-6 bg-background-light dark:bg-background-dark/50 sticky top-0 z-10 backdrop-blur-md">
+<button class="p-2 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight text-primary">GameVote</h1>
+<button class="p-2 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100">notifications</span>
+</button>
+</header>
+<main class="flex-1 px-4 py-6 max-w-4xl mx-auto w-full">
+<!-- Hero Title Section -->
+<section class="text-center mb-10">
+<h2 class="text-4xl font-bold leading-tight mb-3 bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+                Vota por tu favorito
+            </h2>
+<p class="text-slate-500 dark:text-slate-400 text-lg">
+                Elige el mejor juego del mes y ayuda a decidir el ganador de la comunidad.
+            </p>
+</section>
+<!-- Voting Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- Game Card 1: Minecraft -->
+<div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-xl flex flex-col">
+<div class="aspect-square w-full bg-cover bg-center relative" data-alt="Vibrant blocky landscapes from Minecraft game" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD9VmEO7Vhlf3DynwdQVtriqaih4vOr7isfzIKpGBblcEGiLLlN-iUMGpu5uhJ0P3-GC7wq11ypMNSukYMysljCJqTxnqUrKdr7Ys4-0TYESScNdgM1aMV1bjEd5el_1hgZkxJBNuiCGsQpp1o0XMzCIclLcqRexLCSqPKoiuayHbWDX72JUeV_QodSCCH9XZCIG_5gul8soHuatTHnZ_SMUDuqPgmcdmxbY2c8S4bcEQ_cnRqiN_06sLVEOxgS81NYdkcTEuFr9RXh');">
+<div class="absolute top-3 right-3 bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">TOP 1</div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<h3 class="text-xl font-bold mb-1">Minecraft</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-4">Sandbox &amp; Creatividad</p>
+<button class="mt-auto w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">how_to_reg</span>
+                        Votar
+                    </button>
+</div>
+</div>
+<!-- Game Card 2: Roblox -->
+<div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-xl flex flex-col">
+<div class="aspect-square w-full bg-cover bg-center relative" data-alt="Abstract 3D gaming characters in a digital world" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC_MrOSfomTlQ2Qot0BLp41SR-5ZUUPsgaFr6_2aTTm1ygQyZr0L3idqFzhAoVE9M_6k7vTjLz5lhNJg1CJ_teKtpKa4RgPL3l9jNPs5gLpIvT8kVbw9Uhtdk4-Qy9lHetva6MFFufNNYZDxxa0v8hMhtxIJsI7a5L3RS_p58MdEP20GTNtS69JL_kc-Tu1pagRT6wGsAaRJBdwSnU1yKNEUZSHjYg4ug6FMl8byfnRc8mZGLZI0yJXIykDH5f6LVWMhyOEDeNg124j');">
+<div class="absolute top-3 right-3 bg-slate-700 text-white text-xs font-bold px-2 py-1 rounded-full">POPULAR</div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<h3 class="text-xl font-bold mb-1">Roblox</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-4">Plataforma de Juegos</p>
+<button class="mt-auto w-full bg-primary/20 hover:bg-primary/30 text-primary font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">how_to_reg</span>
+                        Votar
+                    </button>
+</div>
+</div>
+<!-- Game Card 3: Fortnite -->
+<div class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden shadow-xl flex flex-col">
+<div class="aspect-square w-full bg-cover bg-center relative" data-alt="Epic battle royale action scene background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCP7WW5YVdzwdM1UHud0pj31k-uTZYuf5m2BrOUty6tIDurxX_nd63Qmm9dNLCrIL2y3mqpSDYMy_kYp2woG1UVfvPhvmdFJFYaY1l0f2RyaQpF3mcfe8jAo7hNshLgWDGQQqMQdu092ZOvsuwBo8EP_Hkneh46lx29Ot8abUlr-15vqrX6OadxXgT9RZRDAW9XokV5pskmvaM12BR64LMQtHaITfLSU9_ORTv6NFb9s85k66v5tadavicN4JbRR1hsehYUfy0fVvoG');">
+</div>
+<div class="p-5 flex flex-col flex-1">
+<h3 class="text-xl font-bold mb-1">Fortnite</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-4">Battle Royale</p>
+<button class="mt-auto w-full bg-primary/20 hover:bg-primary/30 text-primary font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">how_to_reg</span>
+                        Votar
+                    </button>
+</div>
+</div>
+</div>
+<!-- Current Status Section -->
+<section class="bg-primary/5 rounded-xl p-6 border border-primary/20">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold">Resultados en tiempo real</h3>
+<span class="text-xs text-slate-400 uppercase tracking-widest">Actualizado hace 2m</span>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-sm mb-1">
+<span>Minecraft</span>
+<span class="font-bold text-primary">45%</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-white/10 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[45%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-sm mb-1">
+<span>Roblox</span>
+<span class="font-bold text-primary">30%</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-white/10 h-2 rounded-full overflow-hidden">
+<div class="bg-primary/60 h-full w-[30%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-sm mb-1">
+<span>Fortnite</span>
+<span class="font-bold text-primary">25%</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-white/10 h-2 rounded-full overflow-hidden">
+<div class="bg-primary/40 h-full w-[25%]"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="sticky bottom-0 w-full bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-white/10 px-6 py-3 flex justify-between items-center z-20">
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium uppercase tracking-tighter">Inicio</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined !fill-1">check_circle</span>
+<span class="text-[10px] font-medium uppercase tracking-tighter">Votar</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="text-[10px] font-medium uppercase tracking-tighter">Ránking</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium uppercase tracking-tighter">Perfil</span>
+</a>
+</nav>
+</body></html>

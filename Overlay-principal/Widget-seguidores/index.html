@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Stats Widget - Cyberpunk</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Socket.io de StreamElements (Mismo que Despedida) -->
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+
+    <script src="app.js"></script>
+</head>
+<body>
+    <div class="stats-container">
+        <div class="scanlines"></div>
+        
+        <!-- Latest Follower -->
+        <div class="stat-card follower" id="latest-follower">
+            <div class="card-glow"></div>
+            <div class="card-header">
+                <span class="status-dot"></span>
+                <span class="category-label">ULTIMO SEGUIDOR</span>
+                <span class="tech-id">USR.FLW</span>
+            </div>
+            <div class="card-content">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </div>
+                <div class="user-info">
+                    <span class="user-name" id="follower-name">CitrusJupiter</span>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <span class="timestamp">Status: SE: REALTIME ON</span>
+                <span class="data-value">ACTIVO</span>
+            </div>
+        </div>
+
+        <!-- Latest Subscriber -->
+        <div class="stat-card subscriber" id="latest-subscriber">
+            <div class="card-glow"></div>
+            <div class="card-header">
+                <span class="status-dot"></span>
+                <span class="category-label">ULTIMO SUBCRIPTOR</span>
+                <span class="tech-id">USR.SUB</span>
+            </div>
+            <div class="card-content">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                    </svg>
+                </div>
+                <div class="user-info">
+                    <span class="user-name" id="subscriber-name">01jenial</span>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
+                </div>
+                <div class="sub-tier" id="subscriber-tier">TIER 1</div>
+            </div>
+            <div class="card-footer">
+                <span class="timestamp">Status: SE: REALTIME ON</span>
+                <span class="data-value">PREMIUM_REAL</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

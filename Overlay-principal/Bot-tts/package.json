@@ -1,0 +1,16 @@
+{
+  "name": "twitch-tts-obs-bot",
+  "version": "1.0.0",
+  "description": "Bot de Text-to-Speech para Twitch con Micro Interfaz acoplable a OBS Studio",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["twitch", "tts", "obs", "stream", "dock"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

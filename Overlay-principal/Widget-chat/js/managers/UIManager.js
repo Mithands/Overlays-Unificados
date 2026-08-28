@@ -1,0 +1,657 @@
+import UIUtils from '../utils/UIUtils.js';
+import EventManager from '../utils/EventEmitter.js';
+
+/**
+ * UIManager - Gestor Principal de la Interfaz de Usuario
+ * 
+ * Responsabilidades:
+ * - Gestionar elementos DOM
+ * - Coordinar animaciones y transiciones
+ * - Renderizar mensajes con efectos
+ * - Aplicar estilos según rol de usuario
+ * - Gestionar tiempos de visualización
+ * 
+ * Usa:
+ * - UIUtils para procesamiento de texto
+ * - RankingSystem para determinar roles
+ * 
+ * @class UIManager
+ */
+export default class UIManager {
+    /**
+     * Constructor del UIManager
+     * @param {Object} config - Configuración global
+     * @param {RankingSystem} rankingSystem - Sistema de ranking
+     * @param {ExperienceService} experienceService - Servicio de XP
+     * @param {ThirdPartyEmoteService} [thirdPartyEmoteService] - Servicio de emotes externos
+     */
+    constructor(config, rankingSystem, experienceService, thirdPartyEmoteService) {
+        this.config = config;
+        this.rankingSystem = rankingSystem;
+        this.experienceService = experienceService;
+        this.thirdPartyEmoteService = thirdPartyEmoteService;
+
+        // Referencias a elementos DOM
+        this.dom = this.initDOMReferences();
+
+        // Timers para animaciones
+        this.hideTimeout = null;
+        this.decryptTimeout = null;
+        this.fastRevealTimeout = null;
+
+        // Control de cooldown para animaciones
+        this.lastMessageTime = 0;
+
+        // Suscribirse a eventos
+        this._setupEventListeners();
+    }
+
+    /**
+     * Configura los listeners de eventos
+     * @private
+     */
+    _setupEventListeners() {
+        EventManager.on('stream:statusChanged', (isOnline) => {
+            this.updateSystemStatus(isOnline);
+        });
+
+        EventManager.on('stream:categoryUpdated', (category) => {
+            this.updateStreamCategory(category);
+        });
+
+        EventManager.on('ui:systemMessage', (data) => {
+            // data puede ser un string directo o un objeto { text, style... }
+            const text = typeof data === 'string' ? data : data.text;
+            this.displayMessage('SYSTEM', text, {}, 99, 'system');
+        });
+    }
+
+    /**
+     * Inicializa las referencias a elementos DOM
+     * @private
+     * @returns {Object} Objeto con referencias DOM
+     */
+    initDOMReferences() {
+        return {
+            username: document.getElementById('username'),
+            message: document.getElementById('message'),
+            container: document.querySelector('.container'),
+            userBadge: document.getElementById('user-badge'),
+            adminIcon: document.getElementById('admin-icon'),
+            streamCategory: document.getElementById('stream-category'),
+            systemStatus: document.getElementById('system-status-text'),
+            liveBadge: document.querySelector('.live-badge'),
+            watchTimeContainer: document.getElementById('watch-time-container'), // NEW
+            root: document.documentElement
+        };
+    }
+
+    /**
+     * Muestra un mensaje en el overlay
+     * - Decide si mostrar animación de entrada completa o transición rápida
+     * - Gestiona cooldowns para evitar spam de animaciones
+     * 
+     * @param {string} username - Nombre del usuario
+     * @param {string} message - Mensaje a mostrar
+     * @param {Object} emotes - Emotes de Twitch
+     */
+    displayMessage(username, message, emotes, subscriberInfo = {}) {
+        try {
+            // Verificar si el widget está visible
+            const isVisible = !this.dom.container.classList.contains('hidden');
+
+            // Limpiar timers previos
+            this.clearAllTimers();
+
+            // Mostrar container
+            this.dom.container.classList.remove('hidden');
+
+            // Limpiar clases de animación
+            this.dom.username.classList.remove('decrypting');
+            this.dom.message.classList.remove('decrypting');
+            this.dom.container.classList.remove('takeru-bg');
+            this.dom.container.classList.remove('x1lenz-bg');
+            this.dom.container.classList.remove('chandalf-bg');
+            this.dom.container.classList.remove('manguerazo-bg');
+            this.dom.container.classList.remove('duckcris-bg');
+            this.dom.container.classList.remove('mithands-bg');
+            this.dom.container.classList.remove('ractor09-bg');
+            this.dom.container.classList.remove('test-bg');
+            this.dom.container.classList.remove('liiukiin-bg');
+            this.dom.container.classList.remove('subscriber-user'); // Limpiar clase subscriber
+
+            // Determinar tipo de animación
+            const now = Date.now();
+            const timeSinceLast = now - this.lastMessageTime;
+            const shouldShowIncoming = !isVisible && timeSinceLast > this.config.ANIMATION_COOLDOWN_MS;
+
+            this.lastMessageTime = now;
+
+            if (!shouldShowIncoming) {
+                // TRANSICIÓN RÁPIDA (conversación continua)
+                this.fastTransition(username, message, emotes, subscriberInfo);
+            } else {
+                // ANIMACIÓN COMPLETA DE ENTRADA (> 30s de silencio)
+                this.fullIncomingSequence(username, message, emotes, subscriberInfo);
+            }
+
+        } catch (error) {
+            console.error('❌ Error en UIManager.displayMessage:', error);
+        }
+    }
+
+    /**
+     * Transición rápida entre mensajes (sin animación de "incoming")
+     * @private
+     */
+    fastTransition(username, message, emotes, subscriberInfo) {
+        this.dom.username.style.opacity = '0';
+        this.dom.message.style.opacity = '0';
+
+        this.fastRevealTimeout = setTimeout(() => {
+            this.revealMessage(username, message, emotes, subscriberInfo);
+            this.dom.username.style.opacity = '1';
+            this.dom.message.style.opacity = '1';
+        }, 100);
+    }
+
+    /**
+     * Secuencia completa de animación de entrada
+     * @private
+     */
+    fullIncomingSequence(username, message, emotes, subscriberInfo) {
+        // Reset clases
+        this.dom.container.className = 'container';
+
+        // Texto "Incoming"
+        this.dom.username.textContent = "SIGNAL DETECTED";
+        this.dom.username.classList.add('decrypting');
+
+        this.dom.message.innerHTML = "> INCOMING TRANSMISSION...";
+        this.dom.message.classList.add('decrypting');
+
+        // Limpiar otros elementos
+        this.dom.userBadge.textContent = '';
+        this.dom.userBadge.className = 'user-badge';
+
+        // Revelar después de delay
+        this.decryptTimeout = setTimeout(() => {
+            this.dom.username.classList.remove('decrypting');
+            this.dom.message.classList.remove('decrypting');
+            this.revealMessage(username, message, emotes, subscriberInfo);
+        }, 800);
+    }
+
+    revealMessage(username, message, emotes, subscriberInfo = {}) {
+        try {
+            // Procesar nombre de usuario
+            const displayUsername = UIUtils.cleanUsername(username);
+
+            // Obtener rol del usuario (para estilos visuales de contenedor/badge)
+            const userRole = this.rankingSystem.getUserRole(username);
+
+            // Obtener datos de XP y sobreescribir el título del rango (Excepto para SYSTEM)
+            if (this.experienceService && username !== 'SYSTEM') {
+                const xpInfo = this.experienceService.getUserXPInfo(username);
+                if (xpInfo) {
+                    userRole.rankTitle = {
+                        title: xpInfo.title,
+                        icon: 'icon-tech' // Icono por defecto para niveles de XP
+                    };
+                }
+            }
+
+            // Calcular tiempo de visualización
+            let displayTime = this.config.MESSAGE_DISPLAY_TIME + 1000; // Increased by 1s
+            if (['admin', 'top', 'vip'].includes(userRole.role)) {
+                displayTime += 2000; // +2s para usuarios especiales
+            }
+
+            // Aplicar estilos de rol
+            this.applyRoleStyles(userRole);
+
+            // ================= SUBSCRIBER GOLD MODE LOGIC =================
+            // 1. Limpiar timers previos
+            if (this.goldModeTimeout) {
+                clearTimeout(this.goldModeTimeout);
+                this.goldModeTimeout = null;
+            }
+
+            // 2. Resetear estado visual (Quitar Gold Mode del mensaje anterior)
+            this.dom.container.classList.remove('gold-mode-active');
+
+            const xpLevelContainer = this.dom.container.querySelector('.xp-level-container');
+            const xpLevelLabel = this.dom.container.querySelector('.xp-level-label');
+            const xpLevelValue = this.dom.container.querySelector('#xp-level');
+            const userBadge = this.dom.userBadge;
+
+            // Resetear textos a originales (LVL y Rol)
+            if (xpLevelLabel) xpLevelLabel.textContent = 'LVL';
+
+            // 3. Programar transición si es Sub
+            if (subscriberInfo.isSubscriber) {
+                const months = subscriberInfo.badgeInfo ? subscriberInfo.badgeInfo.subscriber : 0;
+                const subValue = months > 0 ? months : '1';
+
+                this.goldModeTimeout = setTimeout(() => {
+                    // ACTIVAR MODO ORO
+                    this.dom.container.classList.add('gold-mode-active');
+
+                    // Cambiar Caja de Nivel -> Meses
+                    if (xpLevelLabel) xpLevelLabel.textContent = 'SUB';
+                    if (xpLevelValue) xpLevelValue.textContent = subValue;
+
+                    // Cambiar Badge -> SUB
+                    if (userBadge) {
+                        userBadge.textContent = `SUB ${subValue} MESES`;
+                    }
+
+                    // MOSTRAR ICONO DE SUB (Mithands.png)
+                    if (this.dom.adminIcon) {
+                        this.dom.adminIcon.src = 'img/Mithands.png';
+                        this.dom.adminIcon.style.display = 'block';
+                    }
+
+                }, 4000); // 4 segundos de delay (ajustable)
+            }
+
+            // Eliminar elementos antiguos de sub (Limpieza de versiones anteriores)
+            const oldSubDisplay = this.dom.container.querySelector('#subscriber-status-display');
+            if (oldSubDisplay) oldSubDisplay.remove();
+
+            const streamCategoryEl = this.dom.container.querySelector('#stream-category');
+            if (streamCategoryEl && streamCategoryEl.textContent.includes('SUB //')) {
+                streamCategoryEl.textContent = 'CHAT.STREAM';
+                streamCategoryEl.style.color = '';
+                streamCategoryEl.style.textShadow = '';
+                streamCategoryEl.style.fontWeight = '';
+            }
+
+            // Eliminar badge anterior si quedó alguno (Limpieza)
+            if (this.dom.username.parentElement) {
+                const stack = this.dom.username.parentElement.querySelector('.user-identity-stack');
+                if (stack) {
+                    const existingSubBadge = stack.querySelector('.sub-badge');
+                    if (existingSubBadge) existingSubBadge.remove();
+                }
+            }
+
+            // Actualizar nombre de usuario
+            this.dom.username.textContent = displayUsername;
+            this.dom.username.setAttribute('data-text', displayUsername);
+
+            // Ajustar tamaño de fuente para nombres largos
+            this.dom.username.classList.remove('small-text', 'extra-small-text');
+
+            if (displayUsername.length > 16) {
+                this.dom.username.classList.add('extra-small-text');
+            } else if (displayUsername.length > 12) {
+                this.dom.username.classList.add('small-text');
+            }
+
+            // Gestionar icono de admin (Arasaka) o Rangos Especiales
+            if (this.dom.adminIcon) {
+                const isAdmin = username.toLowerCase() === (this.config.SPECIAL_USER?.username || 'mithands').toLowerCase();
+                const rankTitle = userRole.rankTitle ? userRole.rankTitle.title : '';
+
+                // Obtener configuración de iconos
+                const uiConfig = this.config.UI || { RANK_ICONS: {}, SPECIAL_ICONS: {} };
+                const rankIcons = uiConfig.RANK_ICONS || {};
+                const specialIcons = uiConfig.SPECIAL_ICONS || {};
+
+                let iconFilename = null;
+
+                if (isAdmin) {
+                    iconFilename = specialIcons.ADMIN || 'Mithands.png';
+                } else if (username === 'SYSTEM') {
+                    iconFilename = specialIcons.SYSTEM || 'netrunner.png';
+                } else if (subscriberInfo.isSubscriber) {
+                    // Icono especial para suscriptores si no tienen otro
+                    // Usamos 'samurai.png' como placeholder de suscriptor si existe, o mantenemos lógica de rango
+                }
+
+                if (!iconFilename) {
+                    // Búsqueda case-insensitive robusta para rangos
+                    const normalizedTitle = (rankTitle || '').trim().toUpperCase();
+                    // Buscar clave que coincida (ej: 'FIXER' === 'FIXER')
+                    const matchingKey = Object.keys(rankIcons).find(k => k.toUpperCase() === normalizedTitle);
+
+                    if (this.config.DEBUG || username.toLowerCase() === 'takeru') {
+                        console.log(`🔍 Icon Lookup for ${username}: Title="${rankTitle}", Normalized="${normalizedTitle}", Match="${matchingKey}"`);
+                    }
+
+                    if (matchingKey) {
+                        iconFilename = rankIcons[matchingKey];
+                    }
+                }
+
+                if (iconFilename) {
+                    this.dom.adminIcon.src = `img/${iconFilename}`;
+                    this.dom.adminIcon.style.display = 'block';
+                } else {
+                    this.dom.adminIcon.style.display = 'none';
+                }
+            }
+
+            // ================= WATCH TIME DISPLAY (FOOTER BOTTOM-RIGHT) =================
+            // Se muestra abajo a la derecha, pegado al borde.
+            if (this.dom.watchTimeContainer && this.experienceService) {
+                // Reset inicial
+                this.dom.watchTimeContainer.innerHTML = '';
+                this.dom.watchTimeContainer.style.display = 'none';
+
+                const userData = this.experienceService.getUserData(username);
+
+                if (userData) {
+                    // Default to 0 if undefined
+                    const minutes = userData.watchTimeMinutes || 0;
+                    let timeText = '';
+
+                    // Formato: 7H
+                    if (minutes >= 60) {
+                        timeText = `${Math.floor(minutes / 60)}H`;
+                    } else {
+                        timeText = `${minutes}m`;
+                    }
+
+                    // Estilo: Absolute Bottom Right
+                    this.dom.watchTimeContainer.style.display = 'flex';
+                    this.dom.watchTimeContainer.style.alignItems = 'center';
+                    this.dom.watchTimeContainer.style.gap = '4px';
+
+                    // Posicionamiento absoluto relativo al contenedor del footer
+                    this.dom.watchTimeContainer.style.position = 'absolute';
+                    this.dom.watchTimeContainer.style.right = '5px'; // Más pegado al borde (antes 15px)
+                    this.dom.watchTimeContainer.style.bottom = '30px';  // Flotando ENCIMA de los logros
+
+                    // Limpiamos estilos extra
+                    this.dom.watchTimeContainer.className = 'xp-streak';
+                    this.dom.watchTimeContainer.style.background = 'none';
+                    this.dom.watchTimeContainer.style.border = 'none';
+                    this.dom.watchTimeContainer.style.boxShadow = 'none';
+                    this.dom.watchTimeContainer.style.padding = '0';
+                    this.dom.watchTimeContainer.style.margin = '0';
+
+                    // Renderizamos con estilo "LURK" igual a "RACHA"
+                    this.dom.watchTimeContainer.innerHTML = `
+                        <span class="streak-label">LURK:</span>
+                        <span class="streak-days">${timeText}</span>
+                    `;
+                }
+            }
+            // ====================================================================
+
+            // Custom Background for Takeru_xiii
+            if (username.toLowerCase() === 'takeru_xiii') {
+                this.dom.container.classList.add('takeru-bg');
+            }
+
+            // Custom Background for x1lenz
+            if (username.toLowerCase() === 'x1lenz') {
+                this.dom.container.classList.add('x1lenz-bg');
+            }
+
+            // Custom Background for chandalf
+            if (['chandalf', 'c_h_a_n_d_a_l_f'].includes(username.toLowerCase())) {
+                this.dom.container.classList.add('chandalf-bg');
+            }
+
+            // Custom Background for manguerazo
+            if (username.toLowerCase() === 'manguerazo') {
+                this.dom.container.classList.add('manguerazo-bg');
+            }
+
+            // Custom Background for DUCKCris
+            if (username.toLowerCase() === 'duckcris') {
+                this.dom.container.classList.add('duckcris-bg');
+            }
+
+            // Custom Background for Mithands
+            if (username.toLowerCase() === 'mithands') {
+                this.dom.container.classList.add('mithands-bg');
+            }
+
+            // Custom Background for Ractor09
+            if (username.toLowerCase() === 'ractor09') {
+                this.dom.container.classList.add('ractor09-bg');
+            }
+
+            // Custom Background for Test
+            if (username.toLowerCase() === 'test') {
+                this.dom.container.classList.add('test-bg');
+            }
+
+            // Custom Background for Liiukiin
+            if (username.toLowerCase() === 'liiukiin') {
+                this.dom.container.classList.add('liiukiin-bg');
+            }
+
+            // Procesar y mostrar mensaje
+            this.displayMessageContent(message, emotes, userRole);
+
+            // Accesibilidad
+            if (this.config.ACCESSIBILITY.ENABLE_ARIA) {
+                this.dom.message.setAttribute('aria-label', `Mensaje de ${username}: ${message}`);
+            }
+
+            // Programar ocultamiento
+            this.scheduleHide(displayTime);
+
+        } catch (error) {
+            console.error('❌ Error en revealMessage:', error);
+            // Asegurar que el widget se oculte aunque haya error
+            this.scheduleHide(this.config.MESSAGE_DISPLAY_TIME);
+        }
+    }
+
+    /**
+     * Aplica estilos CSS según el rol del usuario
+     * @private
+     */
+    applyRoleStyles(userRole) {
+        // Limpiar clases previas
+        this.dom.container.classList.remove(
+            'vip-user', 'top-user', 'admin-user', 'ranked-user', 'status-red'
+        );
+        this.dom.userBadge.classList.remove('vip', 'top-user', 'admin', 'ranked');
+
+        // Aplicar clases de rol
+        if (userRole.containerClass) {
+            this.dom.container.classList.add(userRole.containerClass);
+
+            // Color de status bar para usuarios especiales
+            if (['admin-user', 'top-user', 'vip-user'].includes(userRole.containerClass)) {
+                this.dom.container.classList.add('status-red');
+            }
+        }
+
+        // Aplicar badge (Streak)
+        if (userRole.badgeClass) {
+            this.dom.userBadge.classList.add(userRole.badgeClass);
+
+            // REMOVE "BONUS" TEXT logic
+            // El badge suele venir como "🔥 x2 BONUS" o algo así.
+            // Vamos a limpiar la palabra "BONUS" y dejar solo el icono y valor.
+            // Usamos 'gi' para case-insensitive
+            let cleanBadge = userRole.badge.replace(/bonus/gi, '').trim();
+            this.dom.userBadge.textContent = cleanBadge;
+        }
+
+        // ================= WATCH TIME BADGE INJECTION =================
+        // Inyectamos el badge de tiempo ANTES del badge de racha.
+        // Como userBadge es un span dentro de un container, lo ideal es manipular el container.
+        // El container es .user-identity-stack (ver index.html)
+        // Pero no tenemos referencia directa en this.dom, solo userBadge.
+        // userBadge.parentElement es .user-identity-stack
+
+        if (this.dom.userBadge && this.dom.userBadge.parentElement) {
+            // Eliminar badge de tiempo anterior si existe
+            const existingTimeBadge = this.dom.userBadge.parentElement.querySelector('.time-badge');
+            if (existingTimeBadge) {
+                existingTimeBadge.remove();
+            }
+
+            // Crear nuevo badge si tenemos datos
+            // Necesitamos los datos del usuario. Como no los tenemos pasados aquí explícitamente,
+            // pero sí en revealMessage, deberíamos haberlos pasado o obtenerlos de nuevo.
+            // FIX: applyRoleStyles se llama desde revealMessage.
+            // Vamos a acceder al ExperienceService para obtener el tiempo.
+            // Necesitamos el username, pero applyRoleStyles recibe userRole.
+            // userRole no tiene username necesariamente (depende de RankingSystem).
+            // Vamos a asumir que podemos obtener el username del DOM o que modificamos applyRoleStyles.
+
+            // Mejor enfoque: Hacer esto en revealMessage, no aquí.
+            // Revertimos cambio aquí y lo hacemos en revealMessage donde tenemos el username.
+        }
+    }
+
+
+
+    /**
+     * Procesa y muestra el contenido del mensaje
+     * @private
+     */
+    displayMessageContent(message, emotes, userRole) {
+        const processedMessage = UIUtils.processEmotes(
+            message,
+            emotes,
+            this.thirdPartyEmoteService,
+            this.config.EMOTE_SIZE
+        );
+
+        // Detectar si es solo emotes (Twitch, 7TV, BTTV, FFZ)
+        const emoteAnalysis = UIUtils.isEmoteOnlyMessage(processedMessage);
+
+        // Aplicar efecto scramble solo a Admin y Top 1 (NO si es solo emotes)
+        const isHighRank = userRole.role === 'admin' ||
+            (userRole.role === 'top' && userRole.rankTitle?.icon === 'icon-skull');
+        const hasImages = UIUtils.hasImages(processedMessage);
+
+        // Limpiar clases de tamaño de emotes previas
+        this.dom.message.classList.remove('emote-only', 'emote-large', 'emote-medium');
+
+        if (emoteAnalysis.isEmoteOnly) {
+            // Mensaje solo de emotes: sin comillas
+            this.dom.message.classList.add('emote-only');
+
+            // Agregar clase de tamaño según cantidad de emotes
+            if (emoteAnalysis.emoteCount <= 2) {
+                this.dom.message.classList.add('emote-large');
+            } else if (emoteAnalysis.emoteCount <= 4) {
+                this.dom.message.classList.add('emote-medium');
+            }
+
+            this.dom.message.innerHTML = processedMessage;
+        } else if (isHighRank && !hasImages) {
+            UIUtils.scrambleText(this.dom.message, processedMessage);
+        } else {
+            this.dom.message.innerHTML = `"${processedMessage}"`;
+        }
+    }
+
+    /**
+     * Extiende el tiempo de visualización del widget
+     * Útil cuando aparecen logros u otros eventos secundarios
+     * @param {number} extraTimeMs - Tiempo extra en milisegundos
+     */
+    extendDisplayTime(extraTimeMs) {
+        if (this.dom.container.classList.contains('hidden')) {
+            // Si estaba oculto, lo mostramos
+            this.dom.container.classList.remove('hidden');
+        }
+
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+        }
+
+        if (window.KEEP_WIDGET_VISIBLE === true) return;
+
+        // Programar nuevo timeout
+        this.hideTimeout = setTimeout(() => {
+            if (window.KEEP_WIDGET_VISIBLE === true) return;
+            this.dom.container.classList.add('hidden');
+            if (this.config.DEBUG) console.log('🔒 Widget ocultado tras extensión de tiempo');
+        }, extraTimeMs);
+    }
+
+    /**
+     * Programa el ocultamiento del widget
+     * @private
+     */
+    scheduleHide(displayTime) {
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+        }
+
+        // Check global flag from test panel
+        if (window.KEEP_WIDGET_VISIBLE === true) {
+            return;
+        }
+
+        this.hideTimeout = setTimeout(() => {
+            // Re-check flag just in case it changed during the timeout
+            if (window.KEEP_WIDGET_VISIBLE === true) return;
+
+            this.dom.container.classList.add('hidden');
+            if (this.config.DEBUG) {
+                console.log('🔒 Widget ocultado automáticamente');
+            }
+        }, displayTime);
+    }
+
+    /**
+     * Actualiza la categoría del stream en la barra de estado
+     * @param {string} categoryName - Nombre de la categoría (Juego)
+     */
+    updateStreamCategory(categoryName) {
+        if (!this.dom.streamCategory || !categoryName) return;
+
+        // Efecto visual simple de actualización
+        this.dom.streamCategory.style.opacity = '0';
+
+        setTimeout(() => {
+            // Formato: SYS.ONLINE | [CATEGORY]
+            // Pero 'SYS.ONLINE |' está en otros elementos, aquí solo cambiamos el último span
+            this.dom.streamCategory.textContent = categoryName.toUpperCase();
+            this.dom.streamCategory.style.opacity = '1';
+        }, 300);
+    }
+
+    /**
+     * Actualiza el estado del sistema (ONLINE/OFFLINE)
+     * @param {boolean} isOnline 
+     */
+    updateSystemStatus(isOnline) {
+        if (!this.dom.systemStatus) return;
+
+        const text = isOnline ? 'SYS.ONLINE' : 'SYS.OFFLINE';
+
+        // Solo actualizar si cambia
+        if (this.dom.systemStatus.textContent !== text) {
+            this.dom.systemStatus.style.opacity = '0';
+            setTimeout(() => {
+                this.dom.systemStatus.textContent = text;
+                this.dom.systemStatus.style.opacity = '1';
+
+                // Opcional: Cambiar color si es offline
+                if (!isOnline) {
+                    this.dom.systemStatus.style.color = '#555'; // Greyed out for offline
+                    if (this.dom.liveBadge) this.dom.liveBadge.style.display = 'none';
+                } else {
+                    this.dom.systemStatus.style.color = ''; // Reset to default
+                    if (this.dom.liveBadge) this.dom.liveBadge.style.display = 'block';
+                }
+            }, 300);
+        }
+    }
+
+    /**
+     * Limpia todos los timers activos
+     * @private
+     */
+    clearAllTimers() {
+        if (this.hideTimeout) clearTimeout(this.hideTimeout);
+        if (this.decryptTimeout) clearTimeout(this.decryptTimeout);
+        if (this.fastRevealTimeout) clearTimeout(this.fastRevealTimeout);
+    }
+}

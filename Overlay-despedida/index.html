@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Twitch Overlay - Diagonal</title>
+    
+    <!-- Scripts & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#ff8000",
+                        "background": "#a6a6a6"
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background">
+    <!-- Imágenes que van cambiando -->
+    <div class="kinetic-background"></div>
+
+    <!-- Capa de desenfoque sobre las imágenes -->
+    <div class="blur-layer"></div>
+
+    <!-- Máscara Naranja del Overlay (Arriba) -->
+    <div class="diagonal-mask"></div>
+
+    <!-- Luz de Neón Roja Animada en la línea divisoria -->
+    <div class="diagonal-light"></div>
+
+    <!-- Textos en la zona naranja -->
+    <div class="top-status-text">
+        <span>Terminando</span>
+    </div>
+    
+    <div class="top-status-text-right">
+        <span>Directo</span>
+    </div>
+
+    <div class="overlay-text">
+        <!-- Sección ÚLTIMOS DIRECTOS -->
+        <div id="nav-directos" class="section-nav-item section-active">
+            <div class="header-with-icon">
+                <span class="title-top">ÚLTIMOS</span>
+            </div>
+            <span class="title-bottom">DIRECTOS</span>
+        </div>
+
+        <!-- Sección TOP -->
+        <div id="nav-top" class="section-nav-item section-top-title">
+            <span class="title-top">TOP</span>
+        </div>
+
+        <!-- Sección FOLLOWS Y SUBS -->
+        <div id="nav-follows" class="section-nav-item section-top-title">
+            <span class="title-top">ÚLTIMOS</span>
+            <span class="title-bottom" style="font-size: 1.8rem;">FOLLOWS/SUBS</span>
+        </div>
+    </div>
+
+    <!-- Main Content Layer -->
+    <main class="relative z-30 h-screen w-screen pointer-events-none">
+        <div class="recent-streams-container">
+            <!-- Panel: Últimos Directos -->
+            <div id="panel-directos" class="section-panel">
+                <div id="streams-list">
+                    <!-- Los directos se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+            <!-- Panel: TOP -->
+            <div id="panel-top" class="section-panel" style="display:none; overflow: hidden; height: 500px; mask-image: linear-gradient(to bottom, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
+                <div id="top-list">
+                    <!-- El contenido TOP se cargará dinámicamente -->
+                </div>
+            </div>
+            <!-- Panel: Follows -->
+            <div id="panel-follows" class="section-panel" style="display:none;">
+                <div id="follows-list">
+                    <!-- El contenido de follows se cargará dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/GistService.js"></script>
+    <script src="js/HistoryService.js"></script>
+    <script src="js/StreamElementsService.js"></script>
+
+    <script>
+        const gistService = new GistService(CONFIG);
+        const historyService = new HistoryService(CONFIG, gistService);
+        const seService = new StreamElementsService(CONFIG);
+
+        async function loadRecentStreams() {
+            try {
+                const data = await gistService.loadFile(CONFIG.FILENAME);
+                if (!data) return;
+                
+                // Convertir objeto a array, filtrar entradas inválidas y ordenar por fecha (más reciente primero)
+                const streams = Object.values(data)
+                    .filter(s => s && s.title && !s.title.toLowerCase().includes('error') && !s.title.toLowerCase().includes('occurred'))
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                const container = document.getElementById('streams-list');
+                container.innerHTML = ''; 
+
+                // Tomar los 5 más recientes y mostrarlos por orden (el más reciente arriba)
+                const recentStreams = streams.slice(0, 5);
+                
+                recentStreams.forEach((stream, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'stream-card';
+                    card.style.animationDelay = `${(index + 1) * 0.2}s`;
+                    
+                    const dateFormatted = new Date(stream.date).toLocaleDateString('es-ES');
+
+                    card.innerHTML = `
+                        <div class="stream-info">
+                            <span class="stream-title">${stream.title}</span>
+                            <span class="stream-meta">${stream.category} • ${dateFormatted}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error cargando directos:', error);
+            }
+        }
+
+        async function loadTopUsers() {
+            try {
+                // Obtenemos los datos del TSV (del otro proyecto)
+                const url = 'https://gist.githubusercontent.com/Mithands/35606f8217454675da3829de792b7b3a/raw/';
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Error al obtener el top');
+                
+                const text = await response.text();
+                const lines = text.split('\n').filter(line => line.trim() !== '' && !line.startsWith('RANK'));
+                
+                const container = document.getElementById('top-list');
+                container.innerHTML = '';
+                
+                const topUsers = lines.slice(0, 10);
+                topUsers.forEach((line, index) => {
+                    const [rank, username, timeFormat] = line.split('\t');
+                    
+                    const card = document.createElement('div');
+                    card.className = 'stream-card';
+                    card.style.animationDelay = `${(index + 1) * 0.2}s`;
+                    
+                    card.innerHTML = `
+                        <div class="stream-info">
+                            <span class="stream-title">#${rank} ${username}</span>
+                            <span class="stream-meta">${timeFormat || ''}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error cargando top:', error);
+            }
+        }
+
+        function renderFollowsSubs(events) {
+            const container = document.getElementById('follows-list');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            if (!events || events.length === 0) {
+                container.innerHTML = '<div class="stream-card"><div class="stream-info"><span class="stream-title">Esperando eventos...</span></div></div>';
+                return;
+            }
+
+            events.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'stream-card';
+                card.style.animationDelay = `${(index + 1) * 0.2}s`;
+                
+                card.innerHTML = `
+                    <div class="stream-info">
+                        <span class="stream-title">${item.type}: ${item.name}</span>
+                        <span class="stream-meta">${item.extra}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Suscribirse a los cambios de StreamElements
+        seService.onUpdate = renderFollowsSubs;
+
+        // Iniciar servicios
+        renderFollowsSubs([]); // Mostrar estado de carga inicial
+        loadRecentStreams();
+        loadTopUsers();
+        historyService.start();
+        seService.start();
+        
+        // Recargar los datos cada minuto, solo si la sección NO está visible para evitar animaciones dobles
+        setInterval(() => {
+            const activeSection = SECTIONS[currentSection];
+            if (activeSection !== 'directos') loadRecentStreams();
+            if (activeSection !== 'top') loadTopUsers();
+        }, 60000);
+
+        // --- Alternancia automática de secciones ---
+        const SECTIONS = ['directos', 'top', 'follows'];
+        let currentSection = 0;
+        let sectionTimeout = null;
+        let topScrollReq = null;
+        let totalScrolled = 0;
+        let maxScroll = null;
+        let scrollSpeed = 0.7; // Píxeles por frame
+
+        function animateTopScroll() {
+            const list = document.getElementById('top-list');
+            if (!list) return;
+
+            // Calculamos el maxScroll una sola vez: 
+            // parar cuando el usuario #6 esté arriba del todo del contenedor + un poco más
+            if (maxScroll === null) {
+                const targetCard = list.children[5]; // índice 5 = usuario nº 6
+                if (!targetCard) return;
+                maxScroll = targetCard.offsetTop + 30; // + 30px extra para ver un pelin más
+            }
+
+            totalScrolled += scrollSpeed;
+
+            if (totalScrolled >= maxScroll) {
+                // Snap exacto y paramos
+                list.style.transform = `translateY(-${maxScroll}px)`;
+                stopTopScroll();
+                // 2 segundos de pausa y cambiamos a Últimos Directos
+                if (sectionTimeout) clearTimeout(sectionTimeout);
+                sectionTimeout = setTimeout(switchSection, 3000);
+                return;
+            }
+
+            list.style.transform = `translateY(-${totalScrolled}px)`;
+            topScrollReq = requestAnimationFrame(animateTopScroll);
+        }
+
+        function startTopScroll() {
+            const list = document.getElementById('top-list');
+            if (list) {
+                list.style.transition = 'none';
+                list.style.transform = 'translateY(0)';
+            }
+            totalScrolled = 0;
+            maxScroll = null;
+            if (topScrollReq) cancelAnimationFrame(topScrollReq);
+            topScrollReq = requestAnimationFrame(animateTopScroll);
+        }
+
+        function stopTopScroll() {
+            if (topScrollReq) {
+                cancelAnimationFrame(topScrollReq);
+                topScrollReq = null;
+            }
+        }
+
+        function showSection(name) {
+            // Quitar active de todos los nav
+            document.querySelectorAll('.section-nav-item').forEach(el => el.classList.remove('section-active'));
+            // Ocultar solo el panel que está visible
+            document.querySelectorAll('.section-panel').forEach(el => {
+                if (el.id === 'panel-' + name) return; // No tocar el que vamos a mostrar
+                if (el.style.display !== 'none') {
+                    el.style.transition = 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-8px)'; // sube ligeramente al salir
+                    setTimeout(() => {
+                        el.style.display = 'none';
+                        el.style.transform = 'translateY(8px)'; // preparar para entrar desde abajo
+                    }, 800);
+                }
+            });
+
+            // Activar el nav seleccionado
+            const navEl = document.getElementById('nav-' + name);
+            if (navEl) navEl.classList.add('section-active');
+
+            // Mostrar el panel con fade in suave desde abajo
+            setTimeout(() => {
+                const panelEl = document.getElementById('panel-' + name);
+                if (panelEl) {
+                    panelEl.style.display = 'block';
+                    panelEl.style.opacity = '0';
+                    panelEl.style.transform = 'translateY(8px)';
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => { // doble rAF para asegurar que el display:block ya ha rendereado
+                            panelEl.style.transition = 'opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                            panelEl.style.opacity = '1';
+                            panelEl.style.transform = 'translateY(0)';
+                        });
+                    });
+                }
+                
+                if (name === 'top') {
+                    // Resetear inmediatamente al usuario 1 sin animación
+                    const topList = document.getElementById('top-list');
+                    if (topList) {
+                        topList.style.transition = 'none';
+                        topList.style.transform = 'translateY(0)';
+                    }
+                    totalScrolled = 0;
+                    maxScroll = null;
+                    setTimeout(startTopScroll, 2000); // Espera 2s antes de empezar el scroll
+                } else {
+                    stopTopScroll();
+                }
+            }, 800);
+        }
+
+        function switchSection() {
+            currentSection = (currentSection + 1) % SECTIONS.length;
+            const nextSection = SECTIONS[currentSection];
+            showSection(nextSection);
+            
+            // Tiempos dinámicos: 10s para directos. Para el top ponemos un tiempo límite alto, 
+            // ya que ahora el scroll decide cuándo termina.
+            const duration = nextSection === 'top' ? 60000 : 10000;
+            if (sectionTimeout) clearTimeout(sectionTimeout);
+            sectionTimeout = setTimeout(switchSection, duration);
+        }
+
+        // Mostrar la sección inicial
+        showSection('directos');
+        sectionTimeout = setTimeout(switchSection, 10000);
+    </script>
+</body>
+</html>

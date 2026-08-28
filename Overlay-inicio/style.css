@@ -1,0 +1,301 @@
+body, html { 
+    margin: 0; 
+    padding: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    overflow: hidden; 
+    background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uiGsMIC8D2xukLJzhxUsJH2TfKOZPXZb2pQDSJZakZxfGha3_LyEWhzZl00kI0kLj0-jRMKSHGRWcwhCWZrkNUdDBRCL6M49d0nSWNPFsP4vkFVD6NQpIknMYvEs1xOye4eKSMYbQjUGx-GpVf9E808fSY_31ZbaFKF4VOm1GJGD1pGS1AGNBeik5P7K1BauP2St2jCbLAEWUKLh9E8pEvrKWIErUaKE92ir_op-tC0209BHPfoNiluSuc');
+    background-size: cover;
+    background-position: center;
+}
+
+.kinetic-background { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    z-index: 10; 
+    opacity: 0.95;
+    background-size: cover;
+    background-position: bottom;
+    background-repeat: no-repeat;
+    animation: bgCycle 10s infinite alternate ease-in-out;
+}
+
+.blur-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20;
+    -webkit-backdrop-filter: blur(2.8px);
+    backdrop-filter: blur(2.8px);
+    background: rgba(0, 0, 0, 0.2); 
+}
+
+@keyframes bgCycle {
+    0%, 45% {
+        background-image: url('bottom-bg.png');
+    }
+    55%, 100% {
+        background-image: url('bottom-bg-2.png');
+    }
+}
+
+.diagonal-mask { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: #ff8000; 
+    clip-path: polygon(0 0, 39.0625% 0, 19.2708% 100%, 0% 100%); 
+    opacity: 0.47;
+    z-index: 30;
+}
+
+.diagonal-light {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 35; /* Un poco por encima del overlay */
+    pointer-events: none;
+    /* Trazado de la línea (un poco más ancho que un hilo para que brille) */
+    clip-path: polygon(38.8% 0, 39.3% 0, 19.5% 100%, 19.0% 100%);
+    background: linear-gradient(to bottom, 
+        transparent 0%, 
+        rgb(255, 0, 0) 50%, 
+        transparent 100%);
+    background-size: 100% 200px; /* Tamaño del haz de luz */
+    background-repeat: no-repeat;
+    animation: neonFlow 3s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 10px red);
+    opacity: 0.8;
+}
+
+@keyframes neonFlow {
+    0% {
+        background-position: 0 -70px;
+    }
+    100% {
+        background-position: 0 calc(100% + 70px);
+    }
+}
+body {
+    background-color: transparent;
+    position: relative;
+}
+
+main {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+}
+
+.overlay-text {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 35vh; /* Bajado sustancialmente a petición del usuario */
+    padding-left: 15%; /* Movido ligeramente a la izquierda */
+    z-index: 40;
+    font-family: 'Sora', sans-serif;
+    color: #ff8000;
+    text-transform: uppercase;
+    pointer-events: none;
+    /* Esto recorta el texto exactamente por la línea diagonal de la pantalla */
+    clip-path: polygon(0 0, 39.0625% 0, 19.2708% 100%, 0% 100%);
+}
+
+.top-status-text {
+    position: fixed;
+    top: 70px;
+    left: calc(10% - 125px); /* Movido otros 25px a la izquierda */
+    z-index: 45;
+    font-family: 'Sora', sans-serif;
+    color: white;
+    font-size: 4.5rem; /* Aumentado 5 puntos más */
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    opacity: 0.9;
+    animation: fadeInStatus 1.5s ease-out;
+}
+
+@keyframes fadeInStatus {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 0.9; transform: translateX(0); }
+}
+
+.top-status-text-right {
+    position: fixed;
+    top: 155px;
+    left: calc(35% + 20px); /* Movido 5px a la derecha */
+    z-index: 45;
+    font-family: 'Sora', sans-serif;
+    color: #ff8000; /* Cambiado a Naranja */
+    font-size: 4.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(255, 128, 0, 0.4); /* Resplandor naranja */
+    opacity: 0.9;
+    animation: fadeInStatusRight 1.5s ease-out;
+}
+
+@keyframes fadeInStatusRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 0.9; transform: translateX(0); }
+}
+
+.header-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: -10px;
+}
+
+.yt-icon {
+    width: 60px;
+    height: auto;
+    /* Filtro para que el icono sea del mismo naranja que el texto */
+    filter: invert(56%) sepia(86%) border-radius(0%) saturate(2852%) hue-rotate(1deg) brightness(101%) contrast(106%);
+}
+
+.title-top {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+.title-bottom {
+    font-size: 2.5rem;
+    font-weight: 400;
+    margin-top: -5px;
+    letter-spacing: 2px;
+}
+
+/* Recent Streams Section */
+.recent-streams-container {
+    position: absolute;
+    left: 33.8%; /* Acercado a la línea diagonal ~20px más */
+    right: 2%;   /* Casi hasta el margen derecho */
+    top: 34.5vh; /* Bajado otros 20px */
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    pointer-events: none;
+}
+
+.stream-card {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-left: 5px solid #ff8000;
+    padding: 15px 25px;
+    border-radius: 0 12px 12px 0;
+    width: 100%; /* Ocupa todo el espacio entre la línea y el margen derecho */
+    border-top: 1px solid rgba(255, 128, 0, 0.2);
+    border-right: 1px solid rgba(255, 128, 0, 0.1);
+    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.3);
+    animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Escalonado de la animación */
+.stream-card:nth-child(1) { animation-delay: 0.2s; }
+.stream-card:nth-child(2) { animation-delay: 0.4s; }
+.stream-card:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.stream-title {
+    display: block;
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 1.6rem; /* Reducido un pelín */
+    font-weight: 700;
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    white-space: normal; /* Salta a la siguiente línea si no cabe */
+    line-height: 1.2;
+}
+
+.stream-meta {
+    display: block;
+    color: #ff8000;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    opacity: 0.9;
+}
+
+/* Timer & Progress Bar */
+.refresh-timer-container {
+    margin-top: 40px; /* Bajado más */
+    padding: 20px 30px;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 128, 0, 0.1);
+    animation: slideInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.8s;
+}
+
+.timer-label {
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem; /* Fuente aumentada */
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    display: flex;
+    justify-content: center; /* Centrado */
+    align-items: center;
+    gap: 15px; /* Espacio entre el texto y el cronómetro */
+}
+
+#countdown-text {
+    color: #ff8000;
+    font-size: 1.8rem; /* Cronómetro más grande */
+    text-shadow: 0 0 15px rgba(255, 128, 0, 0.7);
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 36px; /* Aún más ancha, el doble que antes */
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#progress-bar-fill {
+    width: 0%; /* Empezará en 0 y se llenará */
+    height: 100%;
+    background: linear-gradient(90deg, #ff8000, #ffae00);
+    box-shadow: 0 0 15px rgba(255, 128, 0, 0.6);
+    border-radius: 10px;
+    transition: width 1s linear;
+}

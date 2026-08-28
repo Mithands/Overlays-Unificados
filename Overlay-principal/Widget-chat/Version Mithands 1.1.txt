@@ -1,0 +1,11 @@
+Últimos cambios
+
+Se actualizaron unos colores que habían quedado obsoletos en esta versión.
+
+También se cambio la detección de administrador del chat ya que aun detectaba al administrador de la anterior versión.
+
+Además también se actualizo la paleta de colores del administrador y del sistema de cuando consultas los comandos del chat inteligente.
+
+Hice algunas comprobaciones off-line y parece todo correcto.
+
+Todos los cambios se hicieron con la aplicación Antigravity. Ahorra mucho tiempo y quebraderos de cabeza.

@@ -1,0 +1,271 @@
+:root {
+    /* Colors - Matching Mithands' Cyberpunk Theme */
+    --cyber-orange: #ff8c00;
+    --cyber-yellow: #ffb400;
+    --cyber-orange-rgb: 255, 140, 0;
+    --bg-dark: rgba(5, 5, 10, 0.95);
+    --bg-card: rgba(10, 10, 15, 0.85);
+    --text-bright: #ffffff;
+    --text-dim: #a0a0a0;
+    --glow-orange: 0 0 8px var(--cyber-orange), 0 0 16px rgba(255, 140, 0, 0.2);
+    
+    /* Transitions */
+    --transition-speed: 0.4s;
+    --transition-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: transparent;
+    color: var(--text-bright);
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden;
+    padding: 30px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: fit-content;
+    position: relative;
+    padding: 10px;
+    min-width: 300px;
+}
+
+/* Scanlines effect - Premium Version */
+.scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.1) 50%
+    );
+    background-size: 100% 3px;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+.stat-card {
+    grid-area: 1 / 1;
+    background: var(--bg-card);
+    position: relative;
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 290px;
+    width: auto;
+    /* Cyberpunk corner cuts */
+    clip-path: polygon(
+        0 0, 
+        calc(100% - 15px) 0, 
+        100% 15px, 
+        100% 100%, 
+        15px 100%, 
+        0 calc(100% - 15px)
+    );
+    border: 1px solid rgba(var(--cyber-orange-rgb), 0.2);
+    box-shadow: 
+        inset 0 0 20px rgba(0, 0, 0, 0.8),
+        0 10px 20px rgba(0, 0, 0, 0.4);
+    border-left: 2px solid var(--cyber-orange);
+    overflow: hidden;
+
+    /* Estados de rotación */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px) scale(0.96);
+    pointer-events: none;
+    transition: opacity 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.5s;
+}
+
+.stat-card.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    animation: cyber-entrance 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes cyber-entrance {
+    0% {
+        opacity: 0;
+        transform: translateY(12px) skewX(-2deg);
+        filter: brightness(2);
+    }
+    60% {
+        filter: brightness(1.5) hue-rotate(20deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) skewX(0deg);
+        filter: brightness(1);
+    }
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(var(--cyber-orange-rgb), 0.5);
+}
+
+/* Status Bar like the chat */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--cyber-orange);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(var(--cyber-orange-rgb), 0.1);
+    padding-bottom: 6px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--cyber-orange);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    box-shadow: var(--glow-orange);
+    animation: pulse-cyber 2s infinite ease-in-out;
+}
+
+@keyframes pulse-cyber {
+    0%, 100% { opacity: 1; filter: brightness(1); }
+    50% { opacity: 0.3; filter: brightness(1.5); }
+}
+
+.tech-id {
+    margin-left: auto;
+    font-size: 9px;
+    opacity: 0.5;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1px 4px;
+}
+
+/* Content Section */
+.card-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 6px 0;
+}
+
+.icon-box {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--cyber-orange-rgb), 0.1);
+    border: 1px solid rgba(var(--cyber-orange-rgb), 0.3);
+    color: var(--cyber-orange);
+    position: relative;
+    clip-path: polygon(20% 0%, 100% 0%, 100% 80%, 80% 100%, 0% 100%, 0% 20%);
+}
+
+.icon-box svg {
+    width: 24px;
+    height: 24px;
+    filter: drop-shadow(0 0 8px var(--cyber-orange));
+}
+
+.user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.user-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--cyber-yellow);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 180, 0, 0.3);
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* Multi-layered progress bar */
+.progress-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--cyber-orange), transparent);
+    width: 40%;
+    position: absolute;
+    left: -40%;
+    top: 0;
+    animation: data-sweep 2.5s infinite linear;
+}
+
+@keyframes data-sweep {
+    0% { left: -40%; }
+    100% { left: 100%; }
+}
+
+/* Special Badges */
+.sub-tier, .bits-amount {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    background: rgba(var(--cyber-orange-rgb), 0.15);
+    border: 1px solid var(--cyber-orange);
+    color: var(--cyber-orange);
+    text-transform: uppercase;
+    box-shadow: inset 0 0 10px rgba(var(--cyber-orange-rgb), 0.2);
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 85% 100%, 0 100%);
+}
+
+/* Footer Section */
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.stat-card.updating {
+    animation: glitch-update 0.4s ease-out;
+}
+
+@keyframes glitch-update {
+    0% { transform: translateX(0); filter: brightness(1); }
+    20% { transform: translateX(10px) skewX(-5deg); filter: brightness(2) hue-rotate(90deg); }
+    40% { transform: translateX(-5px) skewX(5deg); filter: brightness(1.5) hue-rotate(-90deg); }
+    100% { transform: translateX(0); filter: brightness(1); }
+}
+
+.data-value {
+    color: var(--cyber-orange);
+    font-weight: 700;
+}

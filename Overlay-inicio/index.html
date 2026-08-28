@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Twitch Overlay - Diagonal</title>
+    
+    <!-- Scripts & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Hanken+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#ff8000",
+                        "background": "#a6a6a6"
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background">
+    <!-- Imágenes que van cambiando -->
+    <div class="kinetic-background"></div>
+
+    <!-- Capa de desenfoque sobre las imágenes -->
+    <div class="blur-layer"></div>
+
+    <!-- Máscara Naranja del Overlay (Arriba) -->
+    <div class="diagonal-mask"></div>
+
+    <!-- Luz de Neón Roja Animada en la línea divisoria -->
+    <div class="diagonal-light"></div>
+
+    <!-- Textos en la zona naranja -->
+    <div class="top-status-text">
+        <span>Comenzamos</span>
+    </div>
+    
+    <div class="top-status-text-right">
+        <span>Directo</span>
+    </div>
+
+    <div class="overlay-text">
+        <div class="header-with-icon">
+            <span class="title-top">ÚLTIMOS</span>
+        </div>
+        <span class="title-bottom">DIRECTOS</span>
+    </div>
+
+    <!-- Main Content Layer -->
+    <main class="relative z-30 h-screen w-screen pointer-events-none">
+        <div class="recent-streams-container">
+            <div id="streams-list">
+                <!-- Los directos se cargarán dinámicamente aquí -->
+            </div>
+            
+            <!-- Cuenta atrás y Barra de progreso -->
+            <div class="refresh-timer-container">
+                <div class="timer-label">ESTAMOS EN BREVE: <span id="countdown-text">05:00</span></div>
+                <div class="progress-bar-bg">
+                    <div id="progress-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/GistService.js"></script>
+    <script src="js/HistoryService.js"></script>
+
+    <script>
+        const gistService = new GistService(CONFIG);
+        const historyService = new HistoryService(CONFIG, gistService);
+
+        const UPDATE_INTERVAL = 300000; // 5 minutos en ms
+        let timeLeft = 300; // 5 minutos en segundos
+
+        async function loadRecentStreams() {
+            try {
+                const data = await gistService.loadFile(CONFIG.FILENAME);
+                if (!data) return;
+                
+                // Convertir objeto a array, filtrar entradas inválidas y ordenar por fecha (más reciente primero)
+                const streams = Object.values(data)
+                    .filter(s => s && s.title && !s.title.toLowerCase().includes('error') && !s.title.toLowerCase().includes('occurred'))
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                const container = document.getElementById('streams-list');
+                container.innerHTML = ''; 
+
+                // Tomar los 3 más recientes y mostrarlos por orden (el más reciente arriba)
+                const topThree = streams.slice(0, 3);
+                
+                topThree.forEach((stream, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'stream-card';
+                    card.style.animationDelay = `${(index + 1) * 0.2}s`;
+                    
+                    const dateFormatted = new Date(stream.date).toLocaleDateString('es-ES');
+
+                    card.innerHTML = `
+                        <div class="stream-info">
+                            <span class="stream-title">${stream.title}</span>
+                            <span class="stream-meta">${stream.category} • ${dateFormatted}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                // Ya no reseteamos timeLeft aquí para que se quede en cero como pidió el usuario
+                // timeLeft = 300;
+            } catch (error) {
+                console.error('Error cargando directos:', error);
+            }
+        }
+
+        function updateTimer() {
+            // Si ya terminó, nos aseguramos de que se quede visualmente al máximo
+            if (timeLeft <= 0) {
+                document.getElementById('countdown-text').innerText = "00:00";
+                document.getElementById('progress-bar-fill').style.width = "100%";
+                return;
+            }
+
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            // Actualizar texto
+            document.getElementById('countdown-text').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Actualizar barra (se llena a medida que el tiempo se acaba)
+            const percentage = ((300 - timeLeft) / 300) * 100;
+            document.getElementById('progress-bar-fill').style.width = `${percentage}%`;
+
+            timeLeft--;
+
+            if (timeLeft === 0) {
+                loadRecentStreams();
+            }
+        }
+
+        // Iniciar servicios
+        loadRecentStreams();
+        historyService.start();
+        
+        // Actualizar el timer cada segundo
+        setInterval(updateTimer, 1000);
+    </script>
+</body>
+</html>

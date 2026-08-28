@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Goal Widget - Cyberpunk 2077</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Socket.io para actualización instantánea vía StreamElements -->
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+    <div class="goal-container" id="goalWidget">
+        <div class="scanlines"></div>
+
+        <!-- Tarjeta HUD Cyberpunk -->
+        <div class="goal-card" id="goalCard">
+            <div class="card-glow"></div>
+            
+            <!-- Encabezado con estado y título -->
+            <div class="goal-header">
+                <div class="header-left">
+                    <span class="status-dot"></span>
+                    <span class="goal-title" id="goalTitle">OBJETIVO SEGUIDORES</span>
+                </div>
+                <span class="tech-id" id="techId">SYS.GOAL // 75</span>
+            </div>
+
+            <!-- Centro: Icono, Contador y Porcentaje -->
+            <div class="goal-body">
+                <div class="icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </div>
+
+                <div class="stats-box">
+                    <div class="numbers-row">
+                        <div class="counter-display">
+                            <span class="goal-prefix-label">Meta Seguidores</span>
+                            <span class="current-count" id="currentCount">74</span>
+                            <span class="separator">/</span>
+                            <span class="target-count" id="targetCount">75</span>
+                        </div>
+                        <div class="percentage-badge" id="percentBadge">98%</div>
+                    </div>
+
+                    <!-- Barra de progreso con efecto de barrido de energía -->
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressFill" style="width: 98.6%;">
+                            <div class="progress-shimmer"></div>
+                            <div class="progress-head"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie de tarjeta: Estado de conexión y restantes -->
+            <div class="goal-footer">
+                <div class="footer-status">
+                    <span class="status-label">TWITCH SYNC:</span>
+                    <span class="status-val" id="syncStatus">ONLINE</span>
+                </div>
+                <div class="footer-remaining">
+                    <span>FALTA:</span>
+                    <span class="remaining-val" id="remainingCount">1</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

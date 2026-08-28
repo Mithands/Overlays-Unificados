@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitch TTS Overlay - OBS Browser Source</title>
+  <link rel="stylesheet" href="css/overlay.css">
+</head>
+<body>
+
+  <div class="tts-banner-wrapper">
+    <div id="ttsBubble" class="tts-bubble">
+      <div class="tts-header">
+        <div class="user-info">
+          <span id="ttsRoleBadge" class="role-badge">USER</span>
+          <span id="ttsUsername" class="username">Nombre</span>
+        </div>
+        <div class="audio-waves">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+      </div>
+      <div id="ttsMessage" class="tts-message">Texto del mensaje...</div>
+    </div>
+  </div>
+
+  <script src="js/overlay.js"></script>
+</body>
+</html>

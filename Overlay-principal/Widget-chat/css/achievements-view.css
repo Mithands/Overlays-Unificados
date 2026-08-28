@@ -1,0 +1,249 @@
+/* ==========================================================================
+   ACHIEVEMENTS-VIEW.CSS - Cyberpunk 2077 Standalone Achievement Alert HUD
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap');
+
+:root {
+    --cp-bg: rgba(10, 10, 15, 0.94);
+    --cp-orange: #ff8000;
+    --cp-orange-glow: rgba(255, 128, 0, 0.5);
+    
+    --rarity-color: var(--cp-orange);
+    --rarity-glow: var(--cp-orange-glow);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: transparent;
+    overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: 24px;
+}
+
+/* Contenedor principal de alertas */
+.achievements-viewport {
+    position: relative;
+    width: 100%;
+    max-width: 580px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    pointer-events: none;
+}
+
+/* Notificación Card */
+.cp-achievement-card {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    background: var(--cp-bg);
+    border: 1px solid var(--cp-orange);
+    box-shadow: 0 0 25px var(--cp-orange-glow), inset 0 0 15px rgba(0, 0, 0, 0.85);
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+    padding: 12px 16px;
+    gap: 16px;
+    opacity: 0;
+    transform: translateX(120px) scale(0.95);
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.cp-achievement-card.active {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    animation: cpGlitchFlash 0.3s ease-out;
+}
+
+.cp-achievement-card.leaving {
+    opacity: 0;
+    transform: translateX(60px) scale(0.9);
+    transition: transform 0.4s ease-in, opacity 0.35s ease-in;
+}
+
+/* Paleta unificada Naranja Neón First Hack para todos los logros */
+.cp-achievement-card,
+.cp-achievement-card[data-rarity="common"],
+.cp-achievement-card[data-rarity="uncommon"],
+.cp-achievement-card[data-rarity="rare"],
+.cp-achievement-card[data-rarity="epic"],
+.cp-achievement-card[data-rarity="legendary"] {
+    --rarity-color: var(--cp-orange);
+    --rarity-glow: var(--cp-orange-glow);
+}
+
+/* Scanlines overlay */
+.cp-achievement-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Hologram corner deco */
+.cp-deco-corner {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    color: var(--rarity-color);
+    letter-spacing: 1px;
+    opacity: 0.8;
+    z-index: 2;
+}
+
+/* Icon Frame */
+.cp-icon-frame {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--rarity-color);
+    box-shadow: inset 0 0 10px var(--rarity-glow);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+    z-index: 2;
+}
+
+.cp-icon-frame img {
+    width: 82%;
+    height: 82%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 6px var(--rarity-color));
+}
+
+/* Content */
+.cp-content-frame {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    z-index: 2;
+}
+
+/* Top Meta Row (Label + Merc User) */
+.cp-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.cp-header-tag {
+    color: var(--rarity-color);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-shadow: 0 0 8px var(--rarity-glow);
+}
+
+.cp-header-tag::before {
+    content: '▶';
+    font-size: 8px;
+}
+
+.cp-user-badge {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 6px;
+    border-left: 2px solid var(--rarity-color);
+    font-size: 11px;
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Achievement Name */
+.cp-title-row {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4), 0 0 20px var(--rarity-glow);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Description and Condition */
+.cp-desc-row {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #d0d0d8;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cp-condition-tag {
+    color: var(--rarity-color);
+    font-weight: 700;
+    opacity: 0.95;
+    margin-left: 4px;
+}
+
+/* Progress bar timer on bottom */
+.cp-timer-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--rarity-color);
+    box-shadow: 0 0 8px var(--rarity-color);
+    width: 100%;
+    transform-origin: left;
+    z-index: 3;
+}
+
+.cp-achievement-card.active .cp-timer-bar {
+    animation: cpTimerShrink var(--display-duration, 8s) linear forwards;
+}
+
+/* Animations */
+@keyframes cpTimerShrink {
+    0% { transform: scaleX(1); }
+    100% { transform: scaleX(0); }
+}
+
+@keyframes cpGlitchFlash {
+    0% { filter: brightness(2) contrast(1.5); }
+    30% { filter: hue-rotate(90deg) brightness(1.5); }
+    60% { filter: hue-rotate(-90deg) brightness(1.2); }
+    100% { filter: none; }
+}
