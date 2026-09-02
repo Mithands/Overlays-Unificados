@@ -37,23 +37,34 @@ Documento oficial de seguimiento para las próximas fases de desarrollo, mejoras
   2. **¿Cómo funcionan y de dónde se extrae la información?**
      - **Tops Dinámicos (XP / Nivel):** `ExperienceService.getXPLeaderboard()` ordena en tiempo real la lista de usuarios por nivel y XP (excluyendo automáticamente bots y usuarios de prueba).
      - **Tops Externos (Rangos F1 / Clanes / Roles):** `RankingSystem.js` descarga y parsea un archivo de texto tabulado desde un Gist configurado en `config.js` (`GIST_ID`).
-  3. **Posibles mejoras a explorar:**
-     - Comandos de chat interactivos para consultar el Top 3 / Top 5 en vivo (`!top`, `!topxp`, `!toplurk`).
+  3. **Mejoras implementadas:**
+     - ✅ **Filtro y Exclusión Global de Tops:** Exclusión automática de streamer (`mithands`), cuentas secundarias (`playmithttv`) y bots de todos los tops y estadísticas rotativas.
+     - ✅ **Comandos Interactivos de Chat:** `!top` / `!topxp` (Nivel/XP), `!toplurk` / `!toptiempo` (Watch Time acumulado), `!topracha` (Rachas activas) y `!nivel @user` / `!racha @user`.
+  4. **Posibles mejoras a explorar:**
+     - **Ajustar pantallas de Top en el Widget inactivo:** Proyectar el Top XP y el Top Lurk en la rotación del overlay.
      - Nuevos criterios de ranking (Top First Hackers de la temporada, Top Rachas activas, etc.).
      - Reset de temporadas o rankings mensuales sin perder el progreso histórico.
 
 ---
 
-### 🌐 Fase 4: Unificación y Sincronización del Ecosistema del Stream
-* **Objetivo:** Integrar todos los proyectos, herramientas y widgets satélite relacionados con el stream en un único repositorio/carpeta centralizado (Monorepo o Suite Unificada), garantizando que todos los elementos operen en perfecta armonía y compartan datos en tiempo real.
+### 🌐 Fase 4: Unificación del Ecosistema y Panel Maestro de Control OBS (Master Control Dock)
+* **Objetivo:** Desarrollar una interfaz de control centralizada (Dock acoplable en OBS Studio) y unificar los widgets satélite (Chat, Meta, Seguidores, Votaciones, TTS, Logros) para controlarlos, posicionarlos y calibrarlos al vuelo desde una sola pantalla.
 * **Pilares de la unificación:**
-  1. **Estructura Centralizada de Archivos:**
-     - Agrupar los diferentes módulos bajo un mismo árbol organizado (ej. `/overlays/chat`, `/overlays/achievements`, `/overlays/alerts`, `/shared/assets`, `/shared/services`).
-     - Compartir recursos globales (paleta CSS común, fuentes, sonidos `sounds/`, iconos `img/`).
-  2. **Núcleo de Datos y Estado Compartido:**
-     - Crear un **Core / Event Bus Compartido** (`BroadcastChannel` + sincronización Gist unificada) para que cualquier evento en el chat (nivel, First Hack, suscripción, donación o comando) sea reconocido instantáneamente por los demás widgets sin duplicar conexiones a Twitch.
-  3. **Panel de Control Maestro (Master Hub):**
-     - Desarrollar un panel de control unificado donde el streamer pueda previsualizar, calibrar y gestionar todos sus widgets (chat, logros, tops, alertas) desde una sola interfaz.
+  1. **📍 Control de Posicionamiento y Transformación en Vivo:**
+     - Modificación dinámica de coordenadas (X, Y), escala/zoom y opacidad de cualquier widget.
+     - Presets de pantalla guardables (*"Modo Gaming"*, *"Modo Just Chatting"*, *"Modo Torneo"*).
+     - Botones de alineación rápida (Top-Right, Bottom-Left, Centrado).
+     - Persistencia automática de coordenadas y estados en `localStorage`.
+  2. **👁️ Conmutadores de Visibilidad & Modo Cinemático:**
+     - Toggle ON/OFF individual por widget con animaciones glitch Cyberpunk.
+     - Botón de limpieza total de pantalla para momentos clave en el stream.
+  3. **🎯 Control Dinámico de Parámetros y Metas:**
+     - Cambiar la meta de seguidores o títulos en vivo sin editar código.
+     - Control de votaciones interactivas y volumen/silencio de TTS.
+  4. **🧪 Centro de Pruebas y Emulación Rápida (Test Hub):**
+     - Disparadores manuales para simular Followers, Subs, Cheers, Donaciones y Logros.
+  5. **Núcleo de Datos y Comunicación de Ultra-Baja Latencia:**
+     - Event Bus mediante **`BroadcastChannel` API** + **LocalStorage Events** para comunicación 0 ms entre el Dock de OBS y las Browser Sources.
 
 ---
 
@@ -69,8 +80,12 @@ Documento oficial de seguimiento para las próximas fases de desarrollo, mejoras
   4. **Panel de Temporadas y Eventos:**
      - Histórico de ganadores de temporadas anteriores, torneos de la comunidad y eventos especiales del canal.
   5. **Integración Directa y Actualización Automática:**
-     - La web leerá directamente la base de datos sincronizada en GitHub Gist / API, reflejando los progresos que ocurran en directo sin necesidad de despliegues manuales.
+      - La web leerá directamente la base de datos sincronizada en GitHub Gist / API, reflejando los progresos que ocurran en directo sin necesidad de despliegues manuales.
+  6. **🛠️ Visor y Telemetría de Errores en Vivo (Error Logger HUD):**
+      - Monitor en tiempo real de fallos de JavaScript, desconexiones de Twitch WebSocket, errores de Gist y fallos de recursos multimedia para diagnóstico rápido.
+  7. **💬 Historial y Registro de Mensajes del Chat (Chat Message History & Replay):**
+      - Búsqueda y visualización de mensajes pasados, comandos ejecutados y eventos interactivos en la interfaz.
 
 ---
 
-*Última actualización: Agosto 2026 - Versión 2.6 beta*
+*Última actualización: Septiembre 2026 - Versión 2.8*

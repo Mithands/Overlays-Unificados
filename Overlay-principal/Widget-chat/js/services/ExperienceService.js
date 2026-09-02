@@ -548,36 +548,104 @@ export default class ExperienceService {
     }
 
     /**
-     * Obtiene el leaderboard de XP
-     * @param {number} limit - Cantidad de usuarios a retornar
-     * @returns {Array} Lista ordenada de usuarios
+     * Lista centralizada de usuarios ignorados en rankings
+     * @private
      */
-    getXPLeaderboard(limit = 10) {
-        const ignoredUsers = [
+    _getIgnoredTopUsers() {
+        return [
             'mithands',
+            'playmithttv',
+            'kofkstreambot',
+            'kofistream',
+            'kofistreambot',
+            'nightbot',
             'wizebot',
             'streamelements',
+            'streamlabs',
             'firsthacker',
             'test',
             'test2',
             'test3',
             'streaktester',
             'usuarionuevo',
+            ...(this.config.EXCLUDED_TOP_USERS || []),
+            ...(this.config.BLACKLISTED_USERS || []),
             ...(this.config.XP_IGNORED_USERS_FOR_BONUS || [])
         ].map(u => u.toLowerCase());
+    }
+
+    /**
+     * Obtiene el leaderboard de XP / Nivel
+     * @param {number} limit - Cantidad de usuarios a retornar
+     * @returns {Array} Lista ordenada de usuarios
+     */
+    getXPLeaderboard(limit = 10) {
+        const ignoredUsers = this._getIgnoredTopUsers();
 
         const users = Array.from(this.usersXP.entries())
             .filter(([username]) => !ignoredUsers.includes(username.toLowerCase()))
             .map(([username, data]) => ({
                 username,
-                xp: data.xp,
-                level: data.level,
-                title: this.levelCalculator.getLevelTitle(data.level)
+                xp: data.xp || 0,
+                level: data.level || 1,
+                title: this.levelCalculator.getLevelTitle(data.level || 1)
             }))
             .sort((a, b) => b.xp - a.xp)
             .slice(0, limit);
 
         return users;
+    }
+
+    /**
+     * Obtiene el leaderboard de Tiempo de visualización (Lurk / Watch Time)
+     * @param {number} limit - Cantidad de usuarios a retornar
+     * @returns {Array} Lista ordenada de usuarios por tiempo acumulado
+     */
+    getWatchTimeLeaderboard(limit = 10) {
+        const ignoredUsers = this._getIgnoredTopUsers();
+
+        const users = Array.from(this.usersXP.entries())
+            .filter(([username, data]) => !ignoredUsers.includes(username.toLowerCase()) && (data.watchTimeMinutes || 0) > 0)
+            .map(([username, data]) => ({
+                username,
+                minutes: data.watchTimeMinutes || 0,
+                formatted: this._formatWatchTime(data.watchTimeMinutes || 0)
+            }))
+            .sort((a, b) => b.minutes - a.minutes)
+            .slice(0, limit);
+
+        return users;
+    }
+
+    /**
+     * Obtiene el leaderboard de Rachas de días activos
+     * @param {number} limit - Cantidad de usuarios a retornar
+     * @returns {Array} Lista ordenada de usuarios por racha activa
+     */
+    getStreakLeaderboard(limit = 10) {
+        const ignoredUsers = this._getIgnoredTopUsers();
+
+        const users = Array.from(this.usersXP.entries())
+            .filter(([username, data]) => !ignoredUsers.includes(username.toLowerCase()) && (data.streakDays || 0) > 0)
+            .map(([username, data]) => ({
+                username,
+                streakDays: data.streakDays || 0,
+                bestStreak: data.bestStreak || data.streakDays || 0
+            }))
+            .sort((a, b) => b.streakDays - a.streakDays)
+            .slice(0, limit);
+
+        return users;
+    }
+
+    /**
+     * Formatea minutos de visualización a texto legible
+     * @private
+     */
+    _formatWatchTime(minutes) {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return h > 0 ? `${h}h ${m}m` : `${m}m`;
     }
 
     /**

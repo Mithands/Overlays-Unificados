@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mithands Stream // Cyberpunk Interactive Roadmap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #07090e;
+            --bg-card: rgba(13, 17, 26, 0.85);
+            --bg-card-hover: rgba(22, 29, 44, 0.95);
+            --border-color: rgba(0, 240, 255, 0.2);
+            --border-hover: rgba(0, 240, 255, 0.6);
+            --cyan: #00f0ff;
+            --cyan-glow: rgba(0, 240, 255, 0.35);
+            --yellow: #fcee0a;
+            --yellow-glow: rgba(252, 238, 10, 0.35);
+            --magenta: #ff0055;
+            --magenta-glow: rgba(255, 0, 85, 0.35);
+            --green: #00ff88;
+            --green-glow: rgba(0, 255, 136, 0.35);
+            --text-main: #e8ecf4;
+            --text-muted: #7c889f;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.04) 0%, transparent 40%),
+                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            padding: 20px 15px 80px;
+            line-height: 1.5;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Scanlines Effect */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.4;
+        }
+
+        .container {
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* HEADER HUD */
+        .hud-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--cyan);
+            border-radius: 4px;
+            padding: 24px 30px;
+            margin-bottom: 30px;
+            position: relative;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--cyan-glow);
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .system-tag {
+            font-family: var(--font-mono);
+            color: var(--cyan);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--green);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .title {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #fff;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px var(--cyan-glow);
+        }
+
+        .title span {
+            color: var(--yellow);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-hud {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-hud:hover {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--cyan-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-hud.danger {
+            border-color: var(--magenta);
+            color: var(--magenta);
+            background: rgba(255, 0, 85, 0.08);
+        }
+
+        .btn-hud.danger:hover {
+            background: var(--magenta);
+            color: #fff;
+            box-shadow: 0 0 15px var(--magenta-glow);
+        }
+
+        /* PROGRESS TRACKER */
+        .progress-hud {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .progress-bar-container {
+            position: relative;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .progress-labels strong {
+            color: var(--cyan);
+        }
+
+        .progress-track {
+            height: 14px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cyan), var(--yellow), var(--green));
+            box-shadow: 0 0 15px var(--cyan-glow);
+            transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: sweep 2s infinite linear;
+        }
+
+        @keyframes sweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-stats-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: 4px;
+            text-align: right;
+            min-width: 140px;
+        }
+
+        .stats-percent {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--yellow);
+            line-height: 1;
+            text-shadow: 0 0 10px var(--yellow-glow);
+        }
+
+        .stats-text {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* CONTROLS & FILTERS */
+        .phase-nav-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .phase-nav-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 10px 16px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .phase-nav-btn:hover {
+            border-color: var(--cyan);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 0 10px var(--cyan-glow);
+        }
+
+        .phase-nav-btn.active {
+            background: rgba(0, 240, 255, 0.18);
+            border-color: var(--cyan);
+            color: var(--cyan);
+            box-shadow: 0 0 15px var(--cyan-glow);
+            font-weight: bold;
+        }
+
+        .phase-nav-btn.highlight {
+            border-color: rgba(252, 238, 10, 0.4);
+            color: #d8ce36;
+        }
+
+        .phase-nav-btn.highlight:hover, .phase-nav-btn.highlight.active {
+            background: rgba(252, 238, 10, 0.18);
+            border-color: var(--yellow);
+            color: var(--yellow);
+            box-shadow: 0 0 15px var(--yellow-glow);
+        }
+
+        .phase-nav-btn.highlight-red {
+            border-color: rgba(255, 0, 85, 0.4);
+            color: #ff4d88;
+        }
+
+        .phase-nav-btn.highlight-red:hover, .phase-nav-btn.highlight-red.active {
+            background: rgba(255, 0, 85, 0.18);
+            border-color: var(--magenta);
+            color: var(--magenta);
+            box-shadow: 0 0 15px var(--magenta-glow);
+        }
+
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            padding: 8px 14px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--cyan);
+            color: var(--text-main);
+        }
+
+        .filter-btn.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--cyan);
+            color: var(--cyan);
+            box-shadow: 0 0 10px var(--cyan-glow);
+            font-weight: bold;
+        }
+
+        /* PHASES GRID */
+        .phases-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .phase-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .phase-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .phase-card.highlight {
+            border-color: var(--yellow);
+            box-shadow: 0 0 20px rgba(252, 238, 10, 0.15);
+        }
+
+        .phase-card.highlight-red {
+            border-color: var(--magenta);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.25);
+        }
+
+        .phase-header {
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .phase-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .phase-badge {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 2px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .phase-card.highlight .phase-badge {
+            background: rgba(252, 238, 10, 0.15);
+            border-color: var(--yellow);
+            color: var(--yellow);
+        }
+
+        .phase-card.highlight-red .phase-badge {
+            background: rgba(255, 0, 85, 0.15);
+            border-color: var(--magenta);
+            color: var(--magenta);
+        }
+
+        .phase-title {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        .phase-progress-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .phase-toggle-icon {
+            font-size: 1.1rem;
+            color: var(--cyan);
+            transition: transform 0.3s;
+        }
+
+        .phase-card.collapsed .phase-toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .phase-card.collapsed .phase-body {
+            display: none;
+        }
+
+        .phase-body {
+            padding: 20px;
+        }
+
+        .phase-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+        }
+
+        /* TASK ITEMS */
+        .tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-item {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-left: 3px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 2px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 15px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .task-item:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(0, 240, 255, 0.3);
+            border-left-color: var(--cyan);
+            transform: translateX(4px);
+        }
+
+        .task-item.completed {
+            border-left-color: var(--green);
+            background: rgba(0, 255, 136, 0.03);
+            opacity: 0.75;
+        }
+
+        .task-item.completed:hover {
+            opacity: 1;
+            border-left-color: var(--green);
+        }
+
+        .task-left {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .cyber-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--cyan);
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .task-item.completed .cyber-checkbox {
+            background: var(--green);
+            border-color: var(--green);
+            box-shadow: 0 0 10px var(--green-glow);
+        }
+
+        .cyber-checkbox svg {
+            width: 13px;
+            height: 13px;
+            fill: none;
+            stroke: #000;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s;
+        }
+
+        .task-item.completed .cyber-checkbox svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-text {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .task-details {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-family: var(--font-body);
+        }
+
+        .task-tags {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .task-tag {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-core {
+            background: rgba(255, 0, 85, 0.15);
+            border: 1px solid var(--magenta);
+            color: var(--magenta);
+        }
+
+        .tag-obs {
+            background: rgba(0, 240, 255, 0.15);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+        }
+
+        .tag-ui {
+            background: rgba(252, 238, 10, 0.15);
+            border: 1px solid var(--yellow);
+            color: var(--yellow);
+        }
+
+        .btn-delete-task {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+
+        .btn-delete-task:hover {
+            color: var(--magenta);
+        }
+
+        /* FOOTER HUD */
+        .hud-footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* NOTIFICATION TOAST */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            padding: 12px 20px;
+            border-radius: 2px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            box-shadow: 0 0 20px var(--cyan-glow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1000;
+        }
+
+        /* RESPONSIVE / NARROW VIEWPORTS */
+        @media (max-width: 768px) {
+            .progress-hud {
+                grid-template-columns: 1fr;
+            }
+            .progress-stats-box {
+                text-align: left;
+                min-width: unset;
+                width: 100%;
+            }
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .title {
+                font-size: 1.6rem;
+            }
+            .phase-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER HUD -->
+        <header class="hud-header">
+            <div class="header-top">
+                <div>
+                    <div class="system-tag">
+                        <span class="status-dot"></span>
+                        OVERLAYS MITHANDS // SYSTEM GOALS & ROADMAP
+                    </div>
+                    <h1 class="title">ROADMAP <span>CYBERPUNK</span></h1>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn-hud" id="btnExport" title="Exportar datos a JSON">💾 Exportar</button>
+                    <button class="btn-hud danger" id="btnReset" title="Reiniciar progreso por defecto">⚠️ Reiniciar</button>
+                </div>
+            </div>
+
+            <!-- PROGRESS TRACKER -->
+            <div class="progress-hud">
+                <div class="progress-bar-container">
+                    <div class="progress-labels">
+                        <span>ESTADO DE IMPLEMENTACIÓN: <strong id="progressLabel">0 / 0 TAREAS</strong></span>
+                        <span id="progressPercentageLabel">0%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="mainProgressFill"></div>
+                    </div>
+                </div>
+                <div class="progress-stats-box">
+                    <div class="stats-percent" id="statsPercent">0%</div>
+                    <div class="stats-text">Completado</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- NAVEGADOR DE FASES -->
+        <nav class="phase-nav-container" aria-label="Navegación de Fases">
+            <button class="phase-nav-btn active" data-phase="all">🌐 Ver Todas</button>
+            <button class="phase-nav-btn" data-phase="fase1">Fase 1: Logros View</button>
+            <button class="phase-nav-btn" data-phase="fase2">Fase 2: Auditoría</button>
+            <button class="phase-nav-btn" data-phase="fase3">Fase 3: Tops & Gist</button>
+            <button class="phase-nav-btn highlight" data-phase="fase4">⭐ Fase 4: Master Dock OBS</button>
+            <button class="phase-nav-btn highlight-red" data-phase="fase5">🔥 Fase 5: Web & Logs</button>
+        </nav>
+
+        <!-- CONTROLS & SUBFILTERS -->
+        <div class="controls-bar">
+            <div class="filter-group">
+                <button class="filter-btn active" data-status="all">Todos los estados</button>
+                <button class="filter-btn" data-status="pending">⏳ Pendientes</button>
+                <button class="filter-btn" data-status="completed">✅ Completadas</button>
+            </div>
+        </div>
+
+        <!-- PHASES GRID -->
+        <main class="phases-container" id="phasesContainer">
+            <!-- Renderizado dinámico vía JavaScript -->
+        </main>
+
+        <!-- FOOTER HUD -->
+        <footer class="hud-footer">
+            <div class="footer-left">
+                <span>ESTADO: ONLINE // LOCALSTORAGE PERSISTENCE SYNCED</span>
+            </div>
+            <div>
+                <span>MITHANDS STREAM OVERLAYS &copy; 2026</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="toast" id="hudToast">Estado actualizado</div>
+
+    <script>
+        // Datos iniciales por defecto del Roadmap
+        const DEFAULT_ROADMAP = [
+            {
+                id: 'fase1',
+                badge: 'FASE 01',
+                title: 'Transición Definitiva de Logros a Achievements-view.html',
+                description: 'Desacoplar y retirar las alertas de logros del interior de la tarjeta de chat principal (index.html), delegando la visualización completa en el overlay independiente.',
+                tasks: [
+                    { id: 't1_1', text: 'Desactivar o limpiar el contenedor #achievement-notifications en index.html del chat', details: 'Asegurar que el layout del chat quede completamente limpio.', done: false, tag: 'UI' },
+                    { id: 't1_2', text: 'Configurar NotificationManager.js para emitir únicamente a Achievements-view.html', details: 'Evitar duplicidad de popups.', done: false, tag: 'CORE' },
+                    { id: 't1_3', text: 'Verificar sincronización de sonido y desbloqueo de stats en segundo plano', details: 'Probar que el audio y XP se contabilizan al 100%.', done: false, tag: 'CORE' }
+                ]
+            },
+            {
+                id: 'fase2',
+                badge: 'FASE 02',
+                title: 'Auditoría y Evolución del Sistema de Logros',
+                description: 'Revisar la biblioteca de logros (data/AchievementsData.js) para depurar obsoletos y balancear nuevos desafíos para la comunidad.',
+                tasks: [
+                    { id: 't2_1', text: 'Identificar y eliminar logros obsoletos de juegos/eventos inactivos', details: 'Depurar lista de achievements en AchievementsData.js.', done: false, tag: 'CORE' },
+                    { id: 't2_2', text: 'Balancear logros por categorías (Asistencia, Chat, Cyberpunk, The Witcher, Secretos)', details: 'Ajustar XP y rareza.', done: false, tag: 'CORE' },
+                    { id: 't2_3', text: 'Completar catálogo de iconos en img/logros/ con estética neón perk', details: 'Asegurar consistencia visual de todos los iconos.', done: false, tag: 'UI' }
+                ]
+            },
+            {
+                id: 'fase3',
+                badge: 'FASE 03',
+                title: 'Análisis y Rediseño del Sistema de Tops / Leaderboards',
+                description: 'Optimizar la persistencia en GitHub Gist (GistPersistenceService.js) y la proyección de rankings en directo.',
+                tasks: [
+                    { id: 't3_1', text: 'Añadir comandos interactivos de chat (!top, !topxp, !toplurk, !topracha, !nivel @user)', details: 'Permitir a los espectadores consultar el ranking y perfiles en vivo.', done: true, tag: 'CORE' },
+                    { id: 't3_2', text: 'Implementar nuevos criterios de ranking (Top First Hackers, Top Rachas activas)', details: 'Diversificar los reconocimientos en el stream.', done: false, tag: 'CORE' },
+                    { id: 't3_3', text: 'Diseñar sistema de reset de temporadas sin perder historial acumulado', details: 'Permitir temporadas competitivas mensuales.', done: false, tag: 'CORE' },
+                    { id: 't3_4', text: 'Filtro y Exclusión Global de Tops (Streamer, Cuentas secundarias y Bots)', details: 'Exclusión automática de mithands, playmithttv y bots de todos los rankings de XP, Watch Time y Actividad.', done: true, tag: 'CORE' },
+                    { id: 't3_5', text: 'Ajustar pantallas de Top en el Widget inactivo (Alternar o proyectar Top XP y Top Lurk claramente)', details: 'Permitir mostrar el Top General de XP / Nivel además o en lugar del Top de Watch Time en el overlay.', done: false, tag: 'UI' }
+                ]
+            },
+            {
+                id: 'fase4',
+                badge: 'FASE 04 ⭐',
+                highlight: true,
+                title: 'Panel Maestro de Control OBS & Gestión Integral de Widgets (Master Control Dock)',
+                description: 'Panel acoplable dentro de OBS Studio para gestionar, mover, calibrar y testear todos los widgets del canal desde una sola pantalla.',
+                tasks: [
+                    { id: 't4_1', text: 'Crear la interfaz del Master Dock en OBS (HTML/CSS Cyberpunk HUD)', details: 'Panel acoplable nativo en OBS Studio.', done: false, tag: 'OBS' },
+                    { id: 't4_2', text: 'Control de Posicionamiento X/Y, Escala y Opacidad en vivo', details: 'Sliders de ajuste milimétrico para cada widget independiente.', done: false, tag: 'OBS' },
+                    { id: 't4_3', text: 'Sistema de Presets Rápidos (Modo Gaming, Just Chatting, Torneo)', details: 'Cambiar de layout completo con un solo clic.', done: false, tag: 'OBS' },
+                    { id: 't4_4', text: 'Botones de anclaje rápido (Top-Right, Bottom-Left, Center, etc.)', details: 'Alineación instantánea a esquinas.', done: false, tag: 'UI' },
+                    { id: 't4_5', text: 'Interruptores ON/OFF individuales y botón "Modo Cinemático" (Limpieza de pantalla)', details: 'Ocultar o mostrar widgets con glitch neón.', done: false, tag: 'OBS' },
+                    { id: 't4_6', text: 'Control dinámico de Metas (editar objetivo y textos al vuelo sin tocar código)', details: 'Ajustar la meta de seguidores en vivo.', done: false, tag: 'CORE' },
+                    { id: 't4_7', text: 'Centro de Pruebas y Emulación Rápida (Test Followers, Subs, Cheers, Logros)', details: 'Disparadores de prueba para calibrar overlays.', done: false, tag: 'CORE' },
+                    { id: 't4_8', text: 'Consola unificada de TTS (Volumen maestro, Mute All, salto de cola)', details: 'Integración del Bot-TTS dentro del panel maestro.', done: false, tag: 'CORE' },
+                    { id: 't4_9', text: 'Gestor de Votaciones Interactivas desde el panel', details: 'Lanzar y cerrar encuestas en directo.', done: false, tag: 'CORE' },
+                    { id: 't4_10', text: 'Bus de comunicación ultra-rápido (BroadcastChannel API + LocalStorage)', details: '0 ms de latencia entre el panel de OBS y las fuentes de navegador.', done: false, tag: 'CORE' }
+                ]
+            },
+            {
+                id: 'fase5',
+                badge: 'FASE 05 🔥',
+                highlightRed: true,
+                title: 'Plataforma Web de la Comunidad (Tops, Perfiles y Estadísticas)',
+                description: 'Portal web público e interactivo con estética Cyberpunk para que los espectadores consulten rankings, estadísticas individuales y vitrina de logros.',
+                tasks: [
+                    { id: 't5_1', text: 'Desarrollar portal web interactivo con tablas dinámicas de leaderboards', details: 'Filtros por Nivel, XP, Lurk y Rachas.', done: false, tag: 'UI' },
+                    { id: 't5_2', text: 'Buscador de perfiles de espectadores (Merc Dossier)', details: 'Ficha individual con nivel, badges y logros.', done: false, tag: 'UI' },
+                    { id: 't5_3', text: 'Compendio interactivo de logros (Achievement Showcase)', details: 'Galería de logros con porcentajes globales.', done: false, tag: 'UI' },
+                    { id: 't5_4', text: 'Conexión en directo con GitHub Gist / API para datos en tiempo real', details: 'Sin necesidad de despliegues manuales.', done: false, tag: 'CORE' },
+                    { id: 't5_5', text: 'Visor y Telemetría de Errores en Vivo (Error Logger HUD)', details: 'Consola de telemetría que captura errores de JS, fallos de conexión (Twitch WS, Gist API, audio) y alertas para diagnóstico rápido.', done: false, tag: 'CORE' },
+                    { id: 't5_6', text: 'Historial y Registro de Mensajes del Chat (Chat Message History & Replay)', details: 'Sistema de log y visor interactivo para consultar mensajes anteriores, comandos ejecutados y eventos de chat en directo.', done: false, tag: 'UI' }
+                ]
+            }
+        ];
+
+        // Estado y Almacenamiento
+        const STORAGE_KEY = 'mithands_stream_roadmap_v5';
+        let roadmapData = [];
+        let currentPhaseFilter = 'all';
+        let currentStatusFilter = 'all';
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) {
+                        roadmapData = DEFAULT_ROADMAP.map(defPhase => {
+                            const savedPhase = parsed.find(p => p && p.id === defPhase.id);
+                            if (!savedPhase || !Array.isArray(savedPhase.tasks)) {
+                                return JSON.parse(JSON.stringify(defPhase));
+                            }
+                            return {
+                                ...defPhase,
+                                tasks: defPhase.tasks.map(defTask => {
+                                    const savedTask = savedPhase.tasks.find(t => t && t.id === defTask.id);
+                                    return savedTask ? { ...defTask, done: Boolean(savedTask.done) } : { ...defTask };
+                                })
+                            };
+                        });
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error('Error al cargar datos guardados:', e);
+            }
+            roadmapData = JSON.parse(JSON.stringify(DEFAULT_ROADMAP));
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(roadmapData));
+            updateOverallProgress();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('hudToast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function updateOverallProgress() {
+            let total = 0;
+            let done = 0;
+
+            roadmapData.forEach(phase => {
+                phase.tasks.forEach(task => {
+                    total++;
+                    if (task.done) done++;
+                });
+            });
+
+            const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+
+            document.getElementById('progressLabel').textContent = `${done} / ${total} TAREAS`;
+            document.getElementById('progressPercentageLabel').textContent = `${percent}%`;
+            document.getElementById('statsPercent').textContent = `${percent}%`;
+            document.getElementById('mainProgressFill').style.width = `${percent}%`;
+        }
+
+        function toggleTask(phaseId, taskId) {
+            const phase = roadmapData.find(p => p.id === phaseId);
+            if (!phase) return;
+            const task = phase.tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            task.done = !task.done;
+            saveData();
+            render();
+            showToast(task.done ? `✅ Completado: ${task.text.substring(0, 30)}...` : `⏳ Pendiente: ${task.text.substring(0, 30)}...`);
+        }
+
+        function deleteTask(phaseId, taskId, e) {
+            e.stopPropagation();
+            if (!confirm('¿Eliminar esta tarea del roadmap?')) return;
+            const phase = roadmapData.find(p => p.id === phaseId);
+            if (!phase) return;
+
+            phase.tasks = phase.tasks.filter(t => t.id !== taskId);
+            saveData();
+            render();
+            showToast('🗑️ Tarea eliminada');
+        }
+
+        function render() {
+            const container = document.getElementById('phasesContainer');
+            container.innerHTML = '';
+
+            roadmapData.forEach(phase => {
+                // Filtro 1: Navegación de Fase (si no es 'all', mostrar únicamente la fase seleccionada)
+                if (currentPhaseFilter !== 'all' && phase.id !== currentPhaseFilter) {
+                    return;
+                }
+
+                // Filtro 2: Estado de las tareas (pendientes / completadas)
+                let visibleTasks = [...phase.tasks];
+                if (currentStatusFilter === 'pending') {
+                    visibleTasks = phase.tasks.filter(t => !t.done);
+                } else if (currentStatusFilter === 'completed') {
+                    visibleTasks = phase.tasks.filter(t => t.done);
+                } else {
+                    // Ordenar siempre: primero las pendientes (arriba) y al final las completadas (abajo)
+                    visibleTasks.sort((a, b) => (a.done === b.done ? 0 : a.done ? 1 : -1));
+                }
+
+                if (currentStatusFilter !== 'all' && visibleTasks.length === 0) {
+                    return; // Ocultar fase si no tiene tareas que cumplan el filtro de estado
+                }
+
+                const phaseTotal = phase.tasks.length;
+                const phaseDone = phase.tasks.filter(t => t.done).length;
+                const phasePercent = phaseTotal > 0 ? Math.round((phaseDone / phaseTotal) * 100) : 0;
+
+                const card = document.createElement('div');
+                card.className = `phase-card ${phase.highlight ? 'highlight' : ''} ${phase.highlightRed ? 'highlight-red' : ''}`.trim();
+                card.id = `card_${phase.id}`;
+
+                // Header
+                const header = document.createElement('div');
+                header.className = 'phase-header';
+                header.innerHTML = `
+                    <div class="phase-title-group">
+                        <span class="phase-badge">${phase.badge}</span>
+                        <h2 class="phase-title">${phase.title}</h2>
+                    </div>
+                    <div class="phase-progress-info">
+                        <span>${phaseDone}/${phaseTotal} (${phasePercent}%)</span>
+                        <span class="phase-toggle-icon">▼</span>
+                    </div>
+                `;
+
+                header.addEventListener('click', () => {
+                    card.classList.toggle('collapsed');
+                });
+
+                // Body
+                const body = document.createElement('div');
+                body.className = 'phase-body';
+
+                const desc = document.createElement('div');
+                desc.className = 'phase-desc';
+                desc.textContent = phase.description;
+                body.appendChild(desc);
+
+                const tasksList = document.createElement('div');
+                tasksList.className = 'tasks-list';
+
+                visibleTasks.forEach(task => {
+                    const item = document.createElement('div');
+                    item.className = `task-item ${task.done ? 'completed' : ''}`;
+                    
+                    let tagClass = 'tag-core';
+                    if (task.tag === 'OBS') tagClass = 'tag-obs';
+                    if (task.tag === 'UI') tagClass = 'tag-ui';
+
+                    item.innerHTML = `
+                        <div class="task-left">
+                            <div class="cyber-checkbox">
+                                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <div class="task-content">
+                                <div class="task-text">${task.text}</div>
+                                ${task.details ? `<div class="task-details">${task.details}</div>` : ''}
+                                <div class="task-tags">
+                                    <span class="task-tag ${tagClass}">${task.tag || 'MISC'}</span>
+                                    ${task.done ? '<span class="task-tag" style="background:rgba(0,255,136,0.15); border:1px solid var(--green); color:var(--green)">COMPLETADO</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-delete-task" title="Eliminar tarea">✖</button>
+                    `;
+
+                    item.addEventListener('click', () => toggleTask(phase.id, task.id));
+                    item.querySelector('.btn-delete-task').addEventListener('click', (e) => deleteTask(phase.id, task.id, e));
+
+                    tasksList.appendChild(item);
+                });
+
+                body.appendChild(tasksList);
+                card.appendChild(header);
+                card.appendChild(body);
+                container.appendChild(card);
+            });
+
+            updateOverallProgress();
+        }
+
+        // Navegación de Fases
+        document.querySelectorAll('.phase-nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.phase-nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentPhaseFilter = btn.getAttribute('data-phase');
+                render();
+            });
+        });
+
+        // Filtros de estado (Todas, Pendientes, Completadas)
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentStatusFilter = btn.getAttribute('data-status');
+                render();
+            });
+        });
+
+        // Exportar JSON
+        document.getElementById('btnExport').addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(roadmapData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `roadmap_mithands_${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast('📁 Archivo exportado con éxito');
+        });
+
+        // Resetear
+        document.getElementById('btnReset').addEventListener('click', () => {
+            if (confirm('¿Seguro que deseas reiniciar el roadmap al estado original por defecto?')) {
+                roadmapData = JSON.parse(JSON.stringify(DEFAULT_ROADMAP));
+                saveData();
+                render();
+                showToast('🔄 Roadmap reiniciado');
+            }
+        });
+
+        // Inicialización
+        loadData();
+        render();
+    </script>
+</body>
+</html>

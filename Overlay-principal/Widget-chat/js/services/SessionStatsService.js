@@ -379,17 +379,25 @@ export default class SessionStatsService {
      * @private
      */
     /**
+     * Comprueba si un usuario debe ser excluido de rankings y tops públicos
+     * @private
+     */
+    _isUserExcludedFromTops(username) {
+        if (!username) return true;
+        const lower = username.toLowerCase();
+        if (lower.startsWith('justinfan')) return true;
+        if (this.config.EXCLUDED_TOP_USERS && this.config.EXCLUDED_TOP_USERS.includes(lower)) return true;
+        if (this.config.BLACKLISTED_USERS && this.config.BLACKLISTED_USERS.includes(lower)) return true;
+        return false;
+    }
+
+    /**
      * Obtiene los top N usuarios más activos
      * @private
      */
     _getTopUsers(n = 20) {
         return Array.from(this.stats.userMessageCounts.entries())
-            .filter(([username]) => {
-                // Filtrar usuarios blacklisted y justinfan (aunque trackMessage ya lo hace, doble seguridad)
-                if (username.startsWith('justinfan')) return false;
-                if (this.config.BLACKLISTED_USERS && this.config.BLACKLISTED_USERS.includes(username)) return false;
-                return true;
-            })
+            .filter(([username]) => !this._isUserExcludedFromTops(username))
             .sort((a, b) => b[1] - a[1])
             .slice(0, n)
             .map(([username, count]) => {
@@ -426,9 +434,7 @@ export default class SessionStatsService {
         let highest = { username: null, days: 0 };
 
         this.stats.currentActiveStreaks.forEach((days, username) => {
-            // Filtrar bots
-            if (username.startsWith('justinfan')) return;
-            if (this.config.BLACKLISTED_USERS && this.config.BLACKLISTED_USERS.includes(username)) return;
+            if (this._isUserExcludedFromTops(username)) return;
 
             if (days > highest.days) {
                 highest = {
@@ -454,8 +460,6 @@ export default class SessionStatsService {
                 .map(([username, minutes]) => ({ username, minutes }));
         } else if (this.experienceService) {
             // Iterar sobre todos los usuarios conocidos por XP service
-            // NOTA: Esto acceso a propiedad interna usersXP, idealmente debería haber un método público
-            // pero por simplicidad accedemos al Map si está accesible
             if (this.experienceService.usersXP) {
                 users = Array.from(this.experienceService.usersXP.keys()).map(username => ({
                     username,
@@ -466,13 +470,7 @@ export default class SessionStatsService {
 
         // Sort y slice
         return users
-            .filter(u => {
-                const lowerUser = u.username.toLowerCase();
-                // Filtrar usuarios blacklisted y justinfan
-                if (lowerUser.startsWith('justinfan')) return false;
-                if (this.config.BLACKLISTED_USERS && this.config.BLACKLISTED_USERS.includes(lowerUser)) return false;
-                return u.minutes > 0;
-            })
+            .filter(u => !this._isUserExcludedFromTops(u.username) && u.minutes > 0)
             .sort((a, b) => b.minutes - a.minutes)
             .slice(0, n)
             .map(u => ({

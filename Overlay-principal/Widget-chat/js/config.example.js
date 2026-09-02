@@ -112,6 +112,22 @@ const CONFIG = {
         }
     },
 
+    // Usuarios excluidos de Tops, Rankings y Leaderboards públicos
+    EXCLUDED_TOP_USERS: [
+        'mithands',
+        'playmithttv',
+        'kofkstreambot',
+        'kofistream',
+        'kofistreambot',
+        'nightbot',
+        'streamelements',
+        'streamlabs',
+        'wizebot',
+        'tangiabot',
+        'botrixoficial',
+        'streamroutine_bot'
+    ],
+
     // Usuarios completamente excluidos (Bots de sistema)
     BLACKLISTED_USERS: [
         'tangiabot',
@@ -119,7 +135,11 @@ const CONFIG = {
         'streamelements',
         'streamroutine_bot',
         'botrixoficial',
-        'kofistream'
+        'kofistream',
+        'kofkstreambot',
+        'kofistreambot',
+        'nightbot',
+        'streamlabs'
     ]
 };
 

@@ -8,14 +8,13 @@ export default class HelpCommand extends BaseCommand {
 
     execute({ username }) {
         const commands = [
-            '!nivel (XP/Rank)',
-            '!top (Leaderboard)',
-            '!logros (Tus logros)',
-            '!stats (Tus datos sesión)',
-            '!emotes (Top Emotes)',
-            '!racha (Días seguidos)',
-            '!bro (Contador Bro)',
-            '!uptime (Tiempo directo)'
+            '!nivel [@user]',
+            '!top (o !topxp, !toplurk, !topracha)',
+            '!racha [@user]',
+            '!logros',
+            '!stats',
+            '!emotes',
+            '!uptime'
         ];
         
         const message = `@${username} -> Comandos: ${commands.join(', ')}`;

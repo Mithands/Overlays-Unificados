@@ -3,25 +3,28 @@ import EventManager from '../utils/EventEmitter.js';
 
 export default class LevelCommand extends BaseCommand {
     constructor() {
-        super('nivel', ['level', 'xp', 'rank']);
+        super('nivel', ['level', 'xp', 'rank', 'perfil', 'profile']);
     }
 
-    execute({ username, services }) {
+    execute({ username, args, services }) {
         if (!services.xp) return;
 
-        const xpInfo = services.xp.getUserXPInfo(username);
-        if (!xpInfo) return;
+        // Determinar usuario objetivo (el emisor o el mencionado con @usuario)
+        let targetUser = username;
+        if (args && args[0]) {
+            targetUser = args[0].replace(/^@/, '').trim().toLowerCase();
+        }
 
-        // Aquí podríamos emitir un mensaje de sistema o responder en el chat si tuviéramos un bot
-        // Por ahora, usamos el sistema de notificaciones local para mostrarle su nivel al usuario (o a todos en el overlay)
-        
-        // Opción: Emitir un evento para que el UIManager muestre un "toast" o mensaje especial
-        // O simplemente loguearlo por ahora ya que el overlay es visual passivo mayormente
-        console.log(`📊 !nivel solicitado por ${username}: Nivel ${xpInfo.level} (${xpInfo.currentXP}/${xpInfo.nextLevelXP})`);
+        const xpInfo = services.xp.getUserXPInfo(targetUser);
+        if (!xpInfo) {
+            EventManager.emit('ui:systemMessage', `@${username} -> El usuario ${targetUser} aún no tiene registro de XP.`);
+            return;
+        }
 
-        const message = `@${username} -> Nivel ${xpInfo.level} | ${xpInfo.title} | XP: ${Math.floor(xpInfo.progress.xpInCurrentLevel)}/${Math.floor(xpInfo.progress.xpNeededForNext)}`;
+        const isSelf = targetUser.toLowerCase() === username.toLowerCase();
+        const displayTarget = isSelf ? `@${username}` : `@${username} ➔ @${targetUser}`;
+        const message = `${displayTarget} -> Nivel ${xpInfo.level} | ${xpInfo.title} | XP: ${Math.floor(xpInfo.progress.xpInCurrentLevel)}/${Math.floor(xpInfo.progress.xpNeededForNext)}`;
 
-        // Emitir evento para mostrar en UI
         EventManager.emit('ui:systemMessage', message);
     }
 }
