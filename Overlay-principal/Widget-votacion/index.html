@@ -34,13 +34,23 @@
         }
     </script>
     <style>
-        body {
-            background-color: transparent !important;
-            color: #f8fafc;
-            font-family: 'Space Grotesk', sans-serif;
+        html, body {
+            width: 100vw;
+            height: 100vh;
             margin: 0;
             padding: 0;
             overflow: hidden;
+        }
+
+        body {
+            background-color: rgba(0, 0, 0, 0.92) !important;
+            color: #f8fafc;
+            font-family: 'Space Grotesk', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
         }
         
         .game-card {

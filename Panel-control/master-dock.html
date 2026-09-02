@@ -36,7 +36,7 @@
             <span>🗳️</span>VOTACIONES
         </button>
         <button class="tab-btn" data-tab="audio">
-            <span>🔊</span>AUDIO/TTS
+            <span id="tabAudioIcon">🔊</span>AUDIO/TTS
         </button>
         <button class="tab-btn" data-tab="testing">
             <span>🧪</span>PRUEBAS
@@ -70,12 +70,6 @@
                     </div>
                 </div>
                 <input type="range" class="cyber-range" id="sliderX" min="-500" max="2000" value="1410">
-                <div style="display: flex; gap: 4px; margin-top: 4px;">
-                    <button type="button" class="btn-step" data-axis="x" data-step="-50" style="flex:1; padding: 2px; font-size: 0.7rem; background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.2); color: var(--text-muted); cursor: pointer; border-radius: 2px;">-50</button>
-                    <button type="button" class="btn-step" data-axis="x" data-step="-10" style="flex:1; padding: 2px; font-size: 0.7rem; background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.2); color: var(--text-muted); cursor: pointer; border-radius: 2px;">-10</button>
-                    <button type="button" class="btn-step" data-axis="x" data-step="10" style="flex:1; padding: 2px; font-size: 0.7rem; background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.2); color: var(--text-muted); cursor: pointer; border-radius: 2px;">+10</button>
-                    <button type="button" class="btn-step" data-axis="x" data-step="50" style="flex:1; padding: 2px; font-size: 0.7rem; background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.2); color: var(--text-muted); cursor: pointer; border-radius: 2px;">+50</button>
-                </div>
             </div>
 
             <!-- Posición Y -->
@@ -88,42 +82,35 @@
                     </div>
                 </div>
                 <input type="range" class="cyber-range" id="sliderY" min="-300" max="1200" value="200">
-                <div style="display: flex; gap: 4px; margin-top: 4px;">
-                    <button type="button" class="btn-step" data-axis="y" data-step="-50" style="flex:1; padding: 2px; font-size: 0.7rem; background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.2); color: var(--text-muted); cursor: pointer; border-radius: 2px;">-50</button>
-                    <button type="button" class="btn-step" data-axis="y" data-step="-10" style="flex:1; padding: 2px; font-size: 0.7rem; background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.2); color: var(--text-muted); cursor: pointer; border-radius: 2px;">-10</button>
-                    <button type="button" class="btn-step" data-axis="y" data-step="10" style="flex:1; padding: 2px; font-size: 0.7rem; background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.2); color: var(--text-muted); cursor: pointer; border-radius: 2px;">+10</button>
-                    <button type="button" class="btn-step" data-axis="y" data-step="50" style="flex:1; padding: 2px; font-size: 0.7rem; background: rgba(0,240,255,0.08); border: 1px solid rgba(0,240,255,0.2); color: var(--text-muted); cursor: pointer; border-radius: 2px;">+50</button>
+            </div>
+
+            <!-- Escala y Opacidad en Paralelo (2 Columnas) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="slider-group" style="margin-bottom: 0;">
+                    <div class="slider-label-row">
+                        <span>Escala:</span>
+                        <span class="slider-val" id="valScale">100%</span>
+                    </div>
+                    <input type="range" class="cyber-range" id="sliderScale" min="20" max="250" value="100">
+                </div>
+                <div class="slider-group" style="margin-bottom: 0;">
+                    <div class="slider-label-row">
+                        <span>Opacidad:</span>
+                        <span class="slider-val" id="valOpacity">100%</span>
+                    </div>
+                    <input type="range" class="cyber-range" id="sliderOpacity" min="10" max="100" value="100">
                 </div>
             </div>
 
-            <!-- Escala (Zoom) -->
-            <div class="slider-group">
-                <div class="slider-label-row">
-                    <span>Escala / Tamaño:</span>
-                    <span class="slider-val" id="valScale">100%</span>
-                </div>
-                <input type="range" class="cyber-range" id="sliderScale" min="20" max="250" value="100">
-            </div>
-
-            <!-- Opacidad -->
-            <div class="slider-group">
-                <div class="slider-label-row">
-                    <span>Opacidad:</span>
-                    <span class="slider-val" id="valOpacity">100%</span>
-                </div>
-                <input type="range" class="cyber-range" id="sliderOpacity" min="10" max="100" value="100">
-            </div>
-
-            <!-- Anclajes Rápidos -->
-            <div style="margin-top: 10px;">
-                <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">ANCLAJES RÁPIDOS A ESQUINAS:</span>
-                <div class="anchor-grid">
-                    <button class="btn-anchor" data-anchor="top-left">↖ Top-Izq</button>
-                    <button class="btn-anchor" data-anchor="center">⏺ Centro</button>
-                    <button class="btn-anchor" data-anchor="top-right">↗ Top-Der</button>
-                    <button class="btn-anchor" data-anchor="bottom-left">↙ Bot-Izq</button>
-                    <button class="btn-anchor" data-anchor="reset">🔄 Cero</button>
-                    <button class="btn-anchor" data-anchor="bottom-right">↘ Bot-Der</button>
+            <!-- Anclajes Rápidos en 1 sola fila compacta -->
+            <div style="margin-top: 8px;">
+                <div class="anchor-grid" style="grid-template-columns: repeat(6, 1fr); gap: 2px;">
+                    <button class="btn-anchor" data-anchor="top-left" title="Top Izquierda">↖</button>
+                    <button class="btn-anchor" data-anchor="center" title="Centro">⏺</button>
+                    <button class="btn-anchor" data-anchor="top-right" title="Top Derecha">↗</button>
+                    <button class="btn-anchor" data-anchor="bottom-left" title="Abajo Izquierda">↙</button>
+                    <button class="btn-anchor" data-anchor="reset" title="Restablecer">🔄</button>
+                    <button class="btn-anchor" data-anchor="bottom-right" title="Abajo Derecha">↘</button>
                 </div>
             </div>
         </div>
@@ -185,52 +172,54 @@
                 <span class="section-title"><span>👁️</span> INTERRUPTORES ON/OFF EN PANTALLA</span>
             </div>
 
-            <div class="widget-row">
-                <span class="widget-name">💬 Chat Principal & XP</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_chat" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                <div class="widget-row" style="padding: 4px 6px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+                    <span class="widget-name" style="font-size: 0.72rem;">💬 Chat</span>
+                    <label class="cyber-toggle">
+                        <input type="checkbox" id="toggle_chat" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
 
-            <div class="widget-row">
-                <span class="widget-name">🎯 Barra de Metas</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_metas" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+                <div class="widget-row" style="padding: 4px 6px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+                    <span class="widget-name" style="font-size: 0.72rem;">🎯 Metas</span>
+                    <label class="cyber-toggle">
+                        <input type="checkbox" id="toggle_metas" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
 
-            <div class="widget-row">
-                <span class="widget-name">👥 Últimos Seguidores</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_seguidores" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+                <div class="widget-row" style="padding: 4px 6px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+                    <span class="widget-name" style="font-size: 0.72rem;">👥 Seguid</span>
+                    <label class="cyber-toggle">
+                        <input type="checkbox" id="toggle_seguidores" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
 
-            <div class="widget-row">
-                <span class="widget-name">🗳️ Widget Votaciones</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_votacion" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+                <div class="widget-row" style="padding: 4px 6px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+                    <span class="widget-name" style="font-size: 0.72rem;">🗳️ Votos</span>
+                    <label class="cyber-toggle">
+                        <input type="checkbox" id="toggle_votacion" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
 
-            <div class="widget-row">
-                <span class="widget-name">🔊 Bot TTS / Audio</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_tts" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+                <div class="widget-row" style="padding: 4px 6px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+                    <span class="widget-name" style="font-size: 0.72rem;">🔊 TTS</span>
+                    <label class="cyber-toggle">
+                        <input type="checkbox" id="toggle_tts" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
 
-            <div class="widget-row">
-                <span class="widget-name">🏆 Alertas de Logros</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_logros" checked>
-                    <span class="toggle-slider"></span>
-                </label>
+                <div class="widget-row" style="padding: 4px 6px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+                    <span class="widget-name" style="font-size: 0.72rem;">🏆 Logros</span>
+                    <label class="cyber-toggle">
+                        <input type="checkbox" id="toggle_logros" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -244,22 +233,20 @@
                 <span class="section-title"><span>🎯</span> CONFIGURACIÓN DE METAS</span>
             </div>
 
-            <div class="input-group">
-                <label class="input-label" for="inputGoalTitle">Título de la Meta:</label>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                <label class="input-label" for="inputGoalTitle" style="white-space: nowrap; margin-bottom: 0; min-width: 45px;">Título:</label>
                 <input type="text" class="cyber-input" id="inputGoalTitle" value="META DE SEGUIDORES">
             </div>
 
-            <div class="input-group">
-                <label class="input-label" for="inputGoalTarget">Objetivo Numérico de Seguidores:</label>
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                <label class="input-label" for="inputGoalTarget" style="white-space: nowrap; margin-bottom: 0; min-width: 45px;">Meta:</label>
                 <input type="number" class="cyber-input" id="inputGoalTarget" value="75" min="1">
             </div>
 
-            <button class="btn-action-full" id="btnSaveGoal">
-                💾 APLICAR META EN VIVO
-            </button>
-            <button class="btn-action-full" id="btnAddFollower" style="margin-top: 8px; border-color: var(--neon-green); color: var(--neon-green); background: rgba(0,255,136,0.1);">
-                ➕ AÑADIR +1 SEGUIDOR DE PRUEBA
-            </button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                <button class="btn-action-full" id="btnSaveGoal">💾 APLICAR</button>
+                <button class="btn-action-full" id="btnAddFollower" style="margin-top: 0; border-color: var(--neon-green); color: var(--neon-green); background: rgba(0,255,136,0.1);">➕ +1 TEST</button>
+            </div>
         </div>
     </div>
 
@@ -269,41 +256,28 @@
     <div class="tab-panel" id="panel_voting">
         <div class="panel-section">
             <div class="section-header">
-                <span class="section-title"><span>🗳️</span> CONFIGURACIÓN DE JUEGOS / OPCIONES</span>
+                <span class="section-title"><span>🗳️</span> JUEGOS Y VOTACIÓN EN VIVO</span>
             </div>
 
-            <div class="input-group">
-                <label class="input-label">Opción 1 (Juego 1):</label>
-                <input type="text" class="cyber-input" id="voteName1" value="Mafia">
+            <div style="display: flex; gap: 4px; align-items: center; margin-bottom: 4px;">
+                <input type="text" class="cyber-input" id="voteName1" value="Mafia" placeholder="Opción 1" style="flex: 1;">
+                <button class="btn-anchor" id="btnVote1" style="width: auto; padding: 4px 8px; font-size: 0.72rem; white-space: nowrap;">➕ +1</button>
             </div>
 
-            <div class="input-group">
-                <label class="input-label">Opción 2 (Juego 2):</label>
-                <input type="text" class="cyber-input" id="voteName2" value="Mafia 2">
+            <div style="display: flex; gap: 4px; align-items: center; margin-bottom: 4px;">
+                <input type="text" class="cyber-input" id="voteName2" value="Mafia 2" placeholder="Opción 2" style="flex: 1;">
+                <button class="btn-anchor" id="btnVote2" style="width: auto; padding: 4px 8px; font-size: 0.72rem; white-space: nowrap;">➕ +1</button>
             </div>
 
-            <div class="input-group">
-                <label class="input-label">Opción 3 (Juego 3):</label>
-                <input type="text" class="cyber-input" id="voteName3" value="Uncharted">
+            <div style="display: flex; gap: 4px; align-items: center; margin-bottom: 8px;">
+                <input type="text" class="cyber-input" id="voteName3" value="Uncharted" placeholder="Opción 3" style="flex: 1;">
+                <button class="btn-anchor" id="btnVote3" style="width: auto; padding: 4px 8px; font-size: 0.72rem; white-space: nowrap;">➕ +1</button>
             </div>
 
-            <button class="btn-action-full" id="btnSaveVotes">
-                💾 GUARDAR TÍTULOS DE JUEGOS
-            </button>
-        </div>
-
-        <div class="panel-section">
-            <div class="section-header">
-                <span class="section-title"><span>⚡</span> CONTROL DE VOTOS EN VIVO</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                <button class="btn-action-full" id="btnSaveVotes">💾 GUARDAR</button>
+                <button class="btn-action-full" id="btnResetVotes" style="margin-top: 0; border-color: var(--neon-red); color: var(--neon-red); background: rgba(255,0,85,0.1);">🔄 RESET (0)</button>
             </div>
-            <div class="anchor-grid">
-                <button class="btn-anchor" id="btnVote1">➕ Voto Opción 1</button>
-                <button class="btn-anchor" id="btnVote2">➕ Voto Opción 2</button>
-                <button class="btn-anchor" id="btnVote3">➕ Voto Opción 3</button>
-            </div>
-            <button class="btn-action-full" id="btnResetVotes" style="margin-top: 10px; border-color: var(--neon-red); color: var(--neon-red); background: rgba(255,0,85,0.1);">
-                🔄 REINICIAR VOTACIÓN A CERO (0)
-            </button>
         </div>
     </div>
 
@@ -314,27 +288,21 @@
         <!-- 1. Estado y Reproductor en Vivo -->
         <div class="panel-section">
             <div class="section-header">
-                <span class="section-title"><span>🔊</span> REPRODUCTOR TTS EN VIVO</span>
+                <span class="section-title"><button type="button" id="btnTtsMuteToggle" class="btn-icon-mute" title="Clic para silenciar / activar TTS">🔊</button> REPRODUCTOR TTS EN VIVO</span>
                 <div style="display: flex; gap: 6px; align-items: center;">
                     <span id="ttsTwitchStatusBadge" style="font-size: 0.7rem; background: rgba(0,255,150,0.15); border: 1px solid #00ff96; color: #00ff96; padding: 2px 6px; border-radius: 2px;">🟢 CONECTADO</span>
                     <span id="ttsLiveQueueBadge" style="font-size: 0.75rem; background: rgba(0,240,255,0.15); border: 1px solid var(--cyan); color: var(--cyan); padding: 2px 8px; border-radius: 2px;">0 EN COLA</span>
                 </div>
             </div>
 
-            <div id="ttsNowPlayingCard" style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-left: 3px solid var(--cyan); padding: 10px 12px; border-radius: 4px; margin-bottom: 10px;">
-                <div style="font-size: 0.75rem; color: var(--cyan); font-family: var(--font-mono); margin-bottom: 4px;" id="ttsPlayingUser">ESTADO: LISTO</div>
-                <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.3;" id="ttsPlayingMsg">Esperando mensajes del chat de Twitch...</div>
+            <div id="ttsNowPlayingCard" style="background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); border-left: 3px solid var(--cyan); padding: 8px 10px; border-radius: 4px; margin-bottom: 8px;">
+                <div style="font-size: 0.72rem; color: var(--cyan); font-family: var(--font-mono); margin-bottom: 2px;" id="ttsPlayingUser">ESTADO: LISTO</div>
+                <div style="font-size: 0.8rem; color: var(--text-main); line-height: 1.25;" id="ttsPlayingMsg">Esperando mensajes del chat de Twitch...</div>
             </div>
 
-            <div class="anchor-grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
-                <button class="btn-action-full" id="btnSkipTts" style="margin-top: 0; padding: 8px;">⏭️ SALTAR</button>
-                <button class="btn-action-full" id="btnClearQueueTts" style="margin-top: 0; padding: 8px; border-color: var(--magenta); color: var(--magenta); background: rgba(255,0,85,0.1);">🗑️ VACIAR</button>
-            </div>
-
-            <!-- Test con texto libre -->
-            <div style="display: flex; gap: 6px; margin-top: 10px;">
-                <input type="text" id="inputCustomTtsText" class="cyber-input" placeholder="Escribe para probar voz..." style="flex: 1; padding: 6px 10px; font-size: 0.85rem;">
-                <button class="btn-action-full" id="btnSendCustomTts" style="width: auto; margin-top: 0; padding: 6px 14px; border-color: var(--cyan); color: var(--cyan); background: rgba(0,240,255,0.15); white-space: nowrap;">🗣️ PROBAR</button>
+            <div class="anchor-grid" style="grid-template-columns: 1fr 1fr; gap: 4px;">
+                <button class="btn-action-full" id="btnSkipTts" style="margin-top: 0; padding: 6px;">⏭️ SALTAR</button>
+                <button class="btn-action-full" id="btnClearQueueTts" style="margin-top: 0; padding: 6px; border-color: var(--magenta); color: var(--magenta); background: rgba(255,0,85,0.1);">🗑️ VACIAR</button>
             </div>
         </div>
 
@@ -352,114 +320,108 @@
                 <input type="range" class="cyber-range" id="sliderTtsVolume" min="0" max="100" value="100">
             </div>
 
-            <div class="slider-group" style="margin-top: 10px;">
-                <div class="slider-label-row">
-                    <span>Velocidad (Speed):</span>
-                    <span class="slider-val" id="valTtsRate">1.0x</span>
+            <!-- Velocidad y Tono en Paralelo (2 Columnas) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
+                <div class="slider-group" style="margin-bottom: 0;">
+                    <div class="slider-label-row">
+                        <span>Speed:</span>
+                        <span class="slider-val" id="valTtsRate">1.0x</span>
+                    </div>
+                    <input type="range" class="cyber-range" id="sliderTtsRate" min="0.5" max="2.0" step="0.1" value="1.0">
                 </div>
-                <input type="range" class="cyber-range" id="sliderTtsRate" min="0.5" max="2.0" step="0.1" value="1.0">
-            </div>
 
-            <div class="slider-group" id="pitchGroup" style="margin-top: 10px;">
-                <div class="slider-label-row">
-                    <span>Tono (Pitch):</span>
-                    <span class="slider-val" id="valTtsPitch">1.0</span>
+                <div class="slider-group" id="pitchGroup" style="margin-bottom: 0;">
+                    <div class="slider-label-row">
+                        <span>Pitch:</span>
+                        <span class="slider-val" id="valTtsPitch">1.0</span>
+                    </div>
+                    <input type="range" class="cyber-range" id="sliderTtsPitch" min="0.5" max="2.0" step="0.1" value="1.0">
                 </div>
-                <input type="range" class="cyber-range" id="sliderTtsPitch" min="0.5" max="2.0" step="0.1" value="1.0">
-            </div>
-
-            <div class="widget-row" style="margin-top: 12px;">
-                <span class="widget-name">🔇 Silenciar TTS (Mute)</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_tts_mute">
-                    <span class="toggle-slider"></span>
-                </label>
             </div>
         </div>
 
-        <!-- 3. Motor y Selección de Voz -->
+        <!-- 3. Motor y Selección de Voz (Lado a Lado) -->
         <div class="panel-section">
             <div class="section-header">
                 <span class="section-title"><span>🎙️</span> MOTOR Y VOCES</span>
             </div>
 
-            <div style="margin-bottom: 10px;">
-                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Proveedor de Voz:</label>
-                <select class="cyber-input" id="selectTtsEngine" style="width: 100%; padding: 6px 10px; font-size: 0.85rem;">
-                    <option value="native">Nativo (Navegador / Voces de Windows)</option>
-                    <option value="google">Google Translate TTS (Online)</option>
-                </select>
-            </div>
-
-            <div id="ttsNativeVoicesWrap" style="margin-bottom: 10px;">
-                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Voz del Sistema (Windows):</label>
-                <select class="cyber-input" id="selectTtsVoice" style="width: 100%; padding: 6px 10px; font-size: 0.85rem;">
-                    <option value="">Cargando voces del sistema...</option>
-                </select>
-            </div>
-
-            <div id="ttsGoogleLangWrap" style="margin-bottom: 10px; display: none;">
-                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Idioma Google:</label>
-                <select class="cyber-input" id="selectTtsGoogleLang" style="width: 100%; padding: 6px 10px; font-size: 0.85rem;">
-                    <option value="es">Español (España)</option>
-                    <option value="es-US">Español (Latinoamérica)</option>
-                    <option value="en">Inglés</option>
-                    <option value="ja">Japonés</option>
-                    <option value="pt">Portugués</option>
-                    <option value="fr">Francés</option>
-                    <option value="it">Italiano</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- 4. Filtros y Reglas de Chat -->
-        <div class="panel-section">
-            <div class="section-header">
-                <span class="section-title"><span>🟣</span> FILTROS Y REGLAS DE TWITCH</span>
-            </div>
-
-            <div class="widget-row">
-                <span class="widget-name">Exigir Comando "!tts"</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_tts_require_cmd" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-
-            <div class="widget-row" style="margin-top: 8px;">
-                <span class="widget-name">Leer Nombre ("{user} dice...")</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_tts_read_user" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-
-            <div class="widget-row" style="margin-top: 8px;">
-                <span class="widget-name">Filtrar Enlaces y URLs</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_tts_filter_urls" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-
-            <div class="widget-row" style="margin-top: 8px;">
-                <span class="widget-name">Ignorar Bots Conocidos</span>
-                <label class="cyber-toggle">
-                    <input type="checkbox" id="toggle_tts_ignore_bots" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-
-            <div style="margin-top: 10px;">
-                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Cooldown por usuario (segundos):</label>
-                <input type="number" id="inputTtsCooldown" class="cyber-input" value="5" min="0" max="60" style="width: 100%; padding: 6px 10px; font-size: 0.85rem;">
-            </div>
-
-            <div style="margin-top: 10px;">
-                <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Máximo de caracteres:</label>
-                <input type="number" id="inputTtsMaxChars" class="cyber-input" value="200" min="20" max="500" style="width: 100%; padding: 6px 10px; font-size: 0.85rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 6px;">
+                <div>
+                    <label class="input-label">Proveedor:</label>
+                    <select class="cyber-input" id="selectTtsEngine">
+                        <option value="native">Nativo (Win)</option>
+                        <option value="google">Google TTS</option>
+                    </select>
+                </div>
+                <div id="ttsNativeVoicesWrap">
+                    <label class="input-label">Voz Windows:</label>
+                    <select class="cyber-input" id="selectTtsVoice">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
+                <div id="ttsGoogleLangWrap" style="display: none;">
+                    <label class="input-label">Idioma Google:</label>
+                    <select class="cyber-input" id="selectTtsGoogleLang">
+                        <option value="es">Español</option>
+                        <option value="es-US">LATAM</option>
+                        <option value="en">Inglés</option>
+                        <option value="ja">Japonés</option>
+                        <option value="pt">Portugués</option>
+                        <option value="fr">Francés</option>
+                        <option value="it">Italiano</option>
+                    </select>
+                </div>
             </div>
         </div>
+
+        <!-- 4. Filtros y Reglas de Chat (Colapsable) -->
+        <details class="micro-collapsible">
+            <summary><span>⚙️</span> FILTROS Y REGLAS TWITCH</summary>
+            <div class="collapsible-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                    <div class="widget-row" style="padding: 2px 0;">
+                        <span class="widget-name" style="font-size: 0.7rem;">Exigir !tts</span>
+                        <label class="cyber-toggle">
+                            <input type="checkbox" id="toggle_tts_require_cmd" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="widget-row" style="padding: 2px 0;">
+                        <span class="widget-name" style="font-size: 0.7rem;">Leer nombre</span>
+                        <label class="cyber-toggle">
+                            <input type="checkbox" id="toggle_tts_read_user" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="widget-row" style="padding: 2px 0;">
+                        <span class="widget-name" style="font-size: 0.7rem;">Filtrar URLs</span>
+                        <label class="cyber-toggle">
+                            <input type="checkbox" id="toggle_tts_filter_urls" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="widget-row" style="padding: 2px 0;">
+                        <span class="widget-name" style="font-size: 0.7rem;">Ignorar bots</span>
+                        <label class="cyber-toggle">
+                            <input type="checkbox" id="toggle_tts_ignore_bots" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;">
+                    <div>
+                        <label class="input-label">Cooldown (s):</label>
+                        <input type="number" id="inputTtsCooldown" class="cyber-input" value="5" min="0" max="60">
+                    </div>
+                    <div>
+                        <label class="input-label">Max chars:</label>
+                        <input type="number" id="inputTtsMaxChars" class="cyber-input" value="200" min="20" max="500">
+                    </div>
+                </div>
+            </div>
+        </details>
     </div>
 
     <!-- ========================================== -->
@@ -471,13 +433,13 @@
                 <span class="section-title"><span>🧪</span> DISPARADORES DE PRUEBA EN VIVO</span>
             </div>
 
-            <div class="anchor-grid">
-                <button class="btn-anchor" data-test="follow">👥 Test Follow</button>
-                <button class="btn-anchor" data-test="sub">⭐ Test Sub</button>
-                <button class="btn-anchor" data-test="bits">💎 100 Bits</button>
-                <button class="btn-anchor" data-test="raid">🚀 Test Raid</button>
-                <button class="btn-anchor" data-test="levelup">⚡ Level Up</button>
-                <button class="btn-anchor" data-test="achievement">🏆 Test Logro</button>
+            <div class="anchor-grid" style="grid-template-columns: repeat(3, 1fr); gap: 3px;">
+                <button class="btn-anchor" data-test="follow" title="Test Follow">👥 Follow</button>
+                <button class="btn-anchor" data-test="sub" title="Test Sub">⭐ Sub</button>
+                <button class="btn-anchor" data-test="bits" title="Test Bits">💎 Bits</button>
+                <button class="btn-anchor" data-test="raid" title="Test Raid">🚀 Raid</button>
+                <button class="btn-anchor" data-test="levelup" title="Level Up">⚡ Level</button>
+                <button class="btn-anchor" data-test="achievement" title="Test Logro">🏆 Logro</button>
             </div>
         </div>
     </div>

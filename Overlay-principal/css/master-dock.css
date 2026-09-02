@@ -189,6 +189,22 @@ body {
     gap: 4px;
 }
 
+.btn-icon-mute {
+    background: none;
+    border: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 2px;
+    line-height: 1;
+    vertical-align: middle;
+    transition: transform 0.15s ease;
+}
+
+.btn-icon-mute:hover {
+    transform: scale(1.25);
+}
+
 /* ========== TOGGLE SWITCHES MICRO ========== */
 .widget-row {
     display: flex;
@@ -399,6 +415,13 @@ body {
 .btn-preset-load:hover {
     background: rgba(0, 240, 255, 0.25) !important;
     border-color: var(--cyan) !important;
+}
+.btn-preset-load.active {
+    background: rgba(255, 102, 0, 0.4) !important;
+    border-color: #ff8c00 !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+    box-shadow: 0 0 8px rgba(255, 102, 0, 0.4) !important;
 }
 .btn-preset-save:hover {
     background: rgba(255, 140, 0, 0.3) !important;

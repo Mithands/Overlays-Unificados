@@ -66,6 +66,12 @@ class UnifiedCanvasController {
             const saved = localStorage.getItem(this.STORAGE_KEY);
             if (saved) {
                 const state = JSON.parse(saved);
+                if (state.widgets && state.widgets.votacion) {
+                    if (state.widgets.votacion.x === 40 && state.widgets.votacion.y === 200) {
+                        state.widgets.votacion.x = 0;
+                        state.widgets.votacion.y = 0;
+                    }
+                }
                 this.syncAll(state);
             }
         } catch (e) {

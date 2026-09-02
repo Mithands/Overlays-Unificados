@@ -1,94 +1,100 @@
-# 🎮 Guía de Configuración para Nuevo Canal de Twitch
+# 🎮 Guía Maestra de Configuración para Nuevo Canal de Twitch
 
-Esta guía explica paso a paso cómo configurar este paquete de overlays interactivos para que funcione en cualquier otro canal de Twitch de forma 100% independiente (con su propio chat, su propia base de datos de XP y sus propios rankings).
-
----
-
-## 📋 Resumen de lo que se necesita (5 minutos)
-1. **Nombre del canal de Twitch**.
-2. **Una cuenta de GitHub** (gratuita) para guardar los niveles y la XP en la nube.
-3. **Un Token de GitHub** y un **Gist ID**.
-4. **Editar 3 líneas** en el archivo `config.js`.
+Esta guía explica paso a paso cómo configurar el ecosistema completo de overlays interactivos (**Chat & XP**, **Bot TTS**, **Barra de Metas**, **Últimos Seguidores**, **Votaciones de Juegos** y **Master Control Dock**) para que funcione en cualquier canal de Twitch con su propio chat, base de datos de XP en la nube y panel de control en OBS.
 
 ---
 
-## 🛠️ Paso 1: Configurar el Canal de Twitch
-
-1. Abre la carpeta del overlay: `Overlay-principal/Widget-chat/js/`.
-2. Si no existe el archivo `config.js`, copia `config.example.js` y renómbralo a `config.js`.
-3. Abre `config.js` con el Bloc de notas o cualquier editor de código y cambia el canal:
-   ```javascript
-   CHANNEL_NAME: 'nombre_del_nuevo_canal', // Escribe aquí el usuario de Twitch en minúsculas
-   ```
+## 📋 Resumen Rápido de Configuración (5 minutos)
+1. **Asignar el nombre del canal** en los 4 módulos correspondientes.
+2. **Crear una base de datos en la nube (GitHub Gist)** para guardar la XP y rankings gratis.
+3. **Activar el inicio automático y oculto del servidor** (`Activar_Inicio_Automatico.bat`).
+4. **Añadir el Lienzo Unificado** a OBS (`http://localhost:3000/Overlay-principal/index.html`).
+5. **Añadir el Master Control Dock** como panel integrado en OBS (`http://localhost:3000/Panel-control/master-dock.html`).
 
 ---
 
-## ☁️ Paso 2: Crear la Base de Datos en la Nube (GitHub Gist)
+## 🛠️ Paso 1: Configurar el Canal en los Módulos del Sistema
 
-Para que los niveles, la experiencia, los logros y las rachas se guarden solos mientras estás en stream:
+Para que todos los widgets escuchen los eventos de tu canal de Twitch, edita el nombre de tu canal en estos 4 archivos:
 
-### 2.1 Crear el Gist (Tu Base de Datos)
+### 1.1 Chat & Sistema de Niveles XP
+- **Ruta:** `Overlay-principal/Widget-chat/js/config.js`
+- *(Si no existe, copia `config.example.js` y renómbralo a `config.js`)*
+```javascript
+CHANNEL_NAME: 'tu_canal_aqui', // En minúsculas
+```
+
+### 1.2 Bot de Voz TTS (Audio en Vivo)
+- **Ruta:** `Overlay-principal/Bot-tts/js/overlay.js` (Línea 20)
+```javascript
+const CHANNEL_NAME = 'tu_canal_aqui';
+```
+
+### 1.3 Barra de Metas de Seguidores
+- **Ruta:** `Overlay-principal/Widget-meta/config.js` (Línea 6)
+```javascript
+CHANNEL: 'tu_canal_aqui',
+```
+
+### 1.4 Widget de Últimos Seguidores
+- **Ruta:** `Overlay-principal/Widget-seguidores/app.js` (Línea 7)
+```javascript
+TWITCH_CHANNEL: 'tu_canal_aqui',
+```
+
+---
+
+## ☁️ Paso 2: Base de Datos en la Nube (GitHub Gist)
+
+Para que los niveles, la experiencia, los logros y las rachas se guarden de forma automática e independiente sin depender de servidores de terceros:
+
+### 2.1 Crear el Gist (Tu Base de Datos Gratuita)
 1. Inicia sesión en [GitHub](https://github.com/) y entra en **[gist.github.com](https://gist.github.com/)**.
 2. En **Gist description** escribe: `Twitch Overlay XP Database`.
 3. En **Filename including extension** escribe exactamente: `xp_data.json`.
-4. En el contenido del archivo, pega exactamente esto:
+4. En el contenido del archivo, pega esta plantilla inicial:
    ```json
    {
      "users": {},
      "metadata": {
        "version": "2.0.0",
-       "created": "2026-09-02"
+       "created": "2026-09-03"
      }
    }
    ```
-5. Abajo a la derecha, haz clic en **"Create secret gist"** (o "Create public gist").
-6. **Copiar el Gist ID:** 
-   - Mira la barra de direcciones de tu navegador. La URL será algo como:  
+5. Pulsa en **"Create secret gist"** (o "Create public gist").
+6. **Copia tu Gist ID:** 
+   - Mira la URL en la barra de direcciones de tu navegador:  
      `https://gist.github.com/tu-usuario/7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d`
-   - El código alfanumérico largo del final (`7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d`) es tu **`GIST_ID`**. Cópialo.
+   - El código largo del final (`7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d`) es tu **`GIST_ID`**.
 
----
-
-### 2.2 Crear el Token de Acceso (Tu Llave Secreta)
-1. En GitHub, haz clic en tu foto de perfil (arriba a la derecha) -> **Settings** (Configuración).
-2. En el menú de la izquierda, baja hasta el final y haz clic en **Developer settings**.
-3. Haz clic en **Personal access tokens** -> **Tokens (classic)**.
-4. Haz clic en **Generate new token** -> **Generate new token (classic)**.
-5. Rellena los campos:
+### 2.2 Crear el Token de Acceso Personal
+1. En GitHub, haz clic en tu foto de perfil ➔ **Settings**.
+2. En el menú de la izquierda, baja y haz clic en **Developer settings**.
+3. Haz clic en **Personal access tokens** ➔ **Tokens (classic)**.
+4. Pulsa en **Generate new token** ➔ **Generate new token (classic)**.
+5. Rellena los datos:
    - **Note:** `Twitch Overlay Token`
-   - **Expiration:** Elige `No expiration` (o la duración que prefieras).
-   - **Select scopes:** Marca únicamente la casilla **`gist`** (Create gists).
-6. Baja al final y pulsa el botón verde **Generate token**.
-7. **Copia el token generado** (empieza por `ghp_...`). *Guárdalo bien porque GitHub solo te lo muestra una vez.*
+   - **Expiration:** Elige `No expiration`.
+   - **Select scopes:** Marca **únicamente** la casilla **`gist`** (Create gists).
+6. Pulsa en **Generate token** al final de la página.
+7. **Copia el token generado** (empieza por `ghp_...`).
 
----
-
-## ⚙️ Paso 3: Pegar los Datos en `config.js`
-
-Abre tu archivo `Overlay-principal/Widget-chat/js/config.js` y coloca tus credenciales:
-
+### 2.3 Pegar tus Credenciales en `config.js`
+Abre `Overlay-principal/Widget-chat/js/config.js` y completa:
 ```javascript
-// Gist Storage Config (Persistencia en la nube)
 GIST_STORAGE: {
     ENABLED: true,
-    GIST_ID: 'PEGA_AQUI_TU_GIST_ID', // El código largo de la URL de tu Gist
-    GITHUB_TOKEN: 'PEGA_AQUI_TU_TOKEN_GHP', // Tu token ghp_...
+    GIST_ID: 'PEGA_AQUI_TU_GIST_ID',
+    GITHUB_TOKEN: 'PEGA_AQUI_TU_TOKEN_GHP',
     FILENAME: 'xp_data.json',
     SYNC_INTERVAL: 30000,
     AUTO_BACKUP: true
 },
-```
 
----
-
-## 🎨 Paso 4: Personalizar Exclusiones y Filtros
-
-En el mismo `config.js`, asegúrate de excluir tu propio nombre de usuario y tus bots de los rankings públicos para que no compitan contra los espectadores:
-
-```javascript
-// Excluir a ti mismo y a tus bots de los podios de !top
+// Excluye a ti mismo y a tus bots de los podios de rankings
 EXCLUDED_TOP_USERS: [
-    'nombre_del_nuevo_canal', // Tu canal
+    'tu_canal_aqui',
     'streamlabs',
     'streamelements',
     'nightbot'
@@ -97,29 +103,62 @@ EXCLUDED_TOP_USERS: [
 
 ---
 
-## 🖥️ Paso 5: Poner el Overlay en OBS Studio
+## 🚀 Paso 3: Iniciar el Servidor con Inicio Automático y Oculto
 
-1. Abre **OBS Studio**.
-2. En tu escena de streaming, haz clic en el botón **`+`** (Añadir Fuente) en el panel de Fuentes.
-3. Selecciona **Navegador** (*Browser Source*).
-4. Ponle de nombre `Chat & XP Overlay`.
-5. En la ventana de configuración:
-   - ✅ Marca la casilla **Archivo local** (*Local file*).
-   - Haz clic en **Examinar** y busca el archivo `index.html` (dentro de `Overlay-principal/Widget-chat/index.html`).
-   - **Ancho (*Width*):** `1920` (o `450` si solo quieres la columna del chat).
-   - **Alto (*Height*):** `1080` (o `800` para solo chat).
-   - ✅ Marca la casilla **"Controlar audio a través de OBS"** (si quieres que los sonidos pasen por el mezclador de OBS).
-6. Haz clic en **Aceptar**.
+Para que no tengas que acordarte de abrir el servidor manualmente cada vez que vayas a transmitir y para que **se ejecute de forma invisible en segundo plano (sin ventanas de consola abiertas)**:
+
+1. Haz doble clic en **`Activar_Inicio_Automatico.bat`** (ubicado en la raíz del proyecto).
+2. Este archivo realiza dos acciones de forma automática:
+   - Inicia el servidor de inmediato de forma 100% oculta en `http://localhost:3000`.
+   - Registra el inicio automático con Windows para que cada vez que enciendas tu PC el servidor ya esté funcionando en el puerto 3000 antes de abrir OBS.
+3. *(Opcional)* Si en algún momento deseas detener el servidor o quitarlo del inicio de Windows, cuentas con:
+   - **`Detener_Servidor.bat`** (para apagar el proceso en segundo plano).
+   - **`Desactivar_Inicio_Automatico.bat`** (para desinstalar el inicio automático con Windows).
 
 ---
 
-## 🧪 Paso 6: Comprobación Rápida
+## 🎬 Paso 4: Configurar OBS Studio
 
-1. Abre tu chat de Twitch (o el archivo de pruebas `Overlay-principal/Widget-chat/test-panel.html` en el navegador).
-2. Escribe en el chat:
-   - `!nivel` -> Verás tu tarjeta de nivel en el overlay.
-   - `!top` -> Mostrará el ranking de XP.
-   - `!topmes` -> Mostrará la Liga del Mes actual.
-   - `!ayuda` -> Lista de comandos disponibles.
+### 4.1 Añadir el Lienzo Unificado (Overlay en Pantalla)
+No necesitas añadir múltiples fuentes separadas para cada widget. Todo el stream corre sobre un único lienzo sincronizado:
 
-¡Todo listo! A partir de ese momento, el sistema sumará experiencia automáticamente a tus espectadores y la guardará en tu Gist en la nube.
+1. En **OBS Studio**, en tu Escena de Directo, pulsa en **`+`** (Añadir Fuente).
+2. Selecciona **Navegador** (*Browser Source*) y nómbrala `Lienzo Overlays Mithands`.
+3. Configuración de la fuente:
+   - **URL:** `http://localhost:3000/Overlay-principal/index.html`
+   - **Ancho (*Width*):** `1920`
+   - **Alto (*Height*):** `1080`
+   - ✅ Marca la casilla **"Controlar audio a través de OBS"** (para escuchar y mezclar las alertas y el TTS).
+   - ✅ Marca la casilla **"Actualizar el navegador cuando la escena se active"**.
+4. Pulsa en **Aceptar**.
+
+### 4.2 Añadir el Master Control Dock (Panel Integrado en OBS)
+Controla las posiciones, visibilidad, metas, votaciones y sonido en directo sin salir de OBS:
+
+1. En la barra superior de OBS Studio, haz clic en **Paneles** (*Docks*) ➔ **Paneles de navegador personalizados...**
+2. Añade una nueva fila:
+   - **Nombre del panel:** `Master Dock`
+   - **URL:** `http://localhost:3000/Panel-control/master-dock.html`
+3. Haz clic en **Aplicar**.
+4. Aparecerá una ventana que puedes arrastrar y anclar en cualquier lateral de OBS.
+
+---
+
+## 🎮 Paso 5: Comandos de Chat Disponibles
+
+| Comando | Función |
+| :--- | :--- |
+| `!nivel` / `!nivel @user` | Muestra la tarjeta de nivel cyberpunk, progreso de XP y liga mensual. |
+| `!top` / `!topxp` | Muestra el podio histórico Top 3 de nivel y experiencia acumulada. |
+| `!topmes` | Muestra el ranking exclusivo de la Liga del Mes actual. |
+| `!topracha` | Muestra los espectadores con mayor racha de días consecutivos. |
+| `!racha` | Consulta tus días seguidos en directo y tu multiplicador (hasta x3.0). |
+| `!tts <mensaje>` | Reproduce el mensaje en voz alta en directo por el Bot TTS. |
+| `!ayuda` | Lista en el chat todos los comandos interactivos disponibles. |
+
+---
+
+## 💡 Consejos y Buenas Prácticas
+- **Presets Rápidos:** En el Master Dock puedes usar `⚡ P1`, `⚡ P2` y `⚡ P3` para guardar distribuciones de pantalla (por ejemplo: una para "Just Chatting", otra para "Gaming" y otra para "Pausa").
+- **Votaciones en Vivo:** Al abrir las votaciones desde el Dock, el widget pasará a pantalla completa con fondo atenuado al 92% y prioridad máxima sobre los demás elementos.
+- **Mute Rápido de TTS:** Haz clic sobre el emote `🔊` en la cabecera del Master Dock para mutear o desmutear la voz al instante si hay spam.

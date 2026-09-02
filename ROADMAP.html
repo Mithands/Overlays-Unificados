@@ -848,8 +848,9 @@
                     { id: 't4_9', text: 'Gestor de Votaciones Interactivas desde el panel', details: 'Lanzar y cerrar encuestas en directo.', done: true, tag: 'CORE' },
                     { id: 't4_10', text: 'Bus de comunicación ultra-rápido (BroadcastChannel API + LocalStorage)', details: '0 ms de latencia entre el panel de OBS y las fuentes de navegador.', done: true, tag: 'CORE' },
                     { id: 't4_11', text: 'Lienzo Unificado 1920x1080 (Single Browser Source Canvas en Overlay-principal/index.html)', details: 'Unifica Chat, Metas, Seguidores, Votaciones y TTS en una sola fuente de OBS controlada al vuelo por el Master Dock.', done: true, tag: 'OBS' },
-                    { id: 't4_12', text: 'Pulido Integral del Master Dock, Corrección de Errores & Verificación Global', details: 'Revisión y optimización general de todos los módulos del panel (Posicionamiento, Visibilidad, Presets, Gestor de Metas, Control de Audio/TTS, Votaciones interactivas, Disparadores de prueba y estabilidad global en OBS Studio).', done: false, tag: 'OBS' },
-                    { id: 't4_13', text: 'Diseño e Implementación de Panel Micro/Compacto (Micro Master Dock HUD)', details: 'Versión ultracompacta del panel de control para ocupar el mínimo espacio posible en la ventana de OBS Studio ofreciendo máxima funcionalidad rápida.', done: false, tag: 'OBS' }
+                    { id: 't4_12', text: 'Pulido Integral del Master Dock, Corrección de Errores & Verificación Global', details: 'Revisión y optimización general de todos los módulos del panel (Posicionamiento, Visibilidad, Presets, Gestor de Metas, Control de Audio/TTS, Votaciones interactivas, Disparadores de prueba y estabilidad global en OBS Studio).', done: true, tag: 'OBS' },
+                    { id: 't4_13', text: 'Diseño e Implementación de Panel Micro/Compacto (Micro Master Dock HUD)', details: 'Versión ultracompacta del panel de control para ocupar el mínimo espacio posible en la ventana de OBS Studio ofreciendo máxima funcionalidad rápida.', done: true, tag: 'OBS' },
+                    { id: 't4_14', text: 'Revisar todas las opciones, terminar de ajustar el diseño y revisar que nada falle', details: 'Auditoría integral de todas las opciones, controles del Master Dock y overlays, afinado estético final y verificación rigurosa de que nada falle.', done: false, tag: 'OBS' }
                 ]
             },
             {
@@ -887,14 +888,14 @@
         ];
 
         // Estado y Almacenamiento
-        const STORAGE_KEY = 'mithands_stream_roadmap_v11';
+        const STORAGE_KEY = 'mithands_stream_roadmap_v13';
         let roadmapData = [];
         let currentPhaseFilter = 'all';
         let currentStatusFilter = 'all';
 
         function loadData() {
             try {
-                const saved = localStorage.getItem(STORAGE_KEY);
+                const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('mithands_stream_roadmap_v12') || localStorage.getItem('mithands_stream_roadmap_v11');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed)) {
@@ -907,7 +908,11 @@
                                 ...defPhase,
                                 tasks: defPhase.tasks.map(defTask => {
                                     const savedTask = savedPhase.tasks.find(t => t && t.id === defTask.id);
-                                    const isDone = defTask.done || (savedTask ? Boolean(savedTask.done) : false);
+                                    // Si la tarea es t4_12 o t4_13 mantener completada como pidió el usuario
+                                    let isDone = defTask.done;
+                                    if (savedTask && typeof savedTask.done === 'boolean') {
+                                        isDone = isDone || savedTask.done;
+                                    }
                                     return { ...defTask, done: isDone };
                                 })
                             };

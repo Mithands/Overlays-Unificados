@@ -17,7 +17,7 @@ class MasterDockController {
                 chat: { x: 1410, y: 200, scale: 100, opacity: 100, visible: true },
                 metas: { x: 30, y: 30, scale: 100, opacity: 100, visible: true },
                 seguidores: { x: 30, y: 850, scale: 100, opacity: 100, visible: true },
-                votacion: { x: 40, y: 200, scale: 100, opacity: 100, visible: true },
+                votacion: { x: 0, y: 0, scale: 100, opacity: 100, visible: true },
                 tts: { x: 1520, y: 30, scale: 100, opacity: 90, visible: true },
                 logros: { x: 1280, y: 30, scale: 100, opacity: 100, visible: true }
             },
@@ -154,6 +154,12 @@ class MasterDockController {
                     customPresets: { ...this.state.customPresets, ...(parsed.customPresets || {}) },
                     audio: { ...this.state.audio, ...(parsed.audio || {}) }
                 };
+                if (this.state.widgets && this.state.widgets.votacion) {
+                    if (this.state.widgets.votacion.x === 40 && this.state.widgets.votacion.y === 200) {
+                        this.state.widgets.votacion.x = 0;
+                        this.state.widgets.votacion.y = 0;
+                    }
+                }
             }
         } catch (e) {
             console.error('Error al cargar estado del dock:', e);
@@ -332,6 +338,7 @@ class MasterDockController {
             if (l) l.textContent = `${sPitch.value}`;
         }
         if (tMute) tMute.checked = Boolean(aud.ttsMuted);
+        this.updateTtsMuteIcon();
         if (selEngine) {
             selEngine.value = aud.ttsEngine || 'native';
             this.toggleEngineUI(selEngine.value);
@@ -357,6 +364,11 @@ class MasterDockController {
                 } else {
                     btnLoad.style.borderColor = 'rgba(0,240,255,0.3)';
                     btnLoad.style.color = 'var(--cyan)';
+                }
+                if (this.state.activePresetSlot == slot) {
+                    btnLoad.classList.add('active');
+                } else {
+                    btnLoad.classList.remove('active');
                 }
             }
         });
@@ -694,8 +706,19 @@ class MasterDockController {
         if (toggleTtsMute) {
             toggleTtsMute.addEventListener('change', (e) => {
                 this.state.audio.ttsMuted = e.target.checked;
+                this.updateTtsMuteIcon();
                 this.emit('dock:ttsControl', { action: 'syncSettings', audio: this.state.audio });
                 this.showToast(e.target.checked ? '🔇 TTS SILENCIADO' : '🔊 TTS ACTIVADO');
+            });
+        }
+
+        const btnTtsMuteToggle = document.getElementById('btnTtsMuteToggle');
+        if (btnTtsMuteToggle) {
+            btnTtsMuteToggle.addEventListener('click', () => {
+                this.state.audio.ttsMuted = !this.state.audio.ttsMuted;
+                this.updateTtsMuteIcon();
+                this.emit('dock:ttsControl', { action: 'syncSettings', audio: this.state.audio });
+                this.showToast(this.state.audio.ttsMuted ? '🔇 TTS SILENCIADO' : '🔊 TTS ACTIVADO');
             });
         }
 
@@ -888,7 +911,7 @@ class MasterDockController {
             chat: { w: 480, h: 850 },
             metas: { w: 520, h: 160 },
             seguidores: { w: 450, h: 200 },
-            votacion: { w: 1000, h: 680 },
+            votacion: { w: 1920, h: 1080 },
             tts: { w: 350, h: 120 },
             logros: { w: 600, h: 300 }
         }[wId] || { w: 400, h: 300 };
@@ -897,30 +920,30 @@ class MasterDockController {
 
         switch (anchor) {
             case 'top-left':
-                w.x = margin;
-                w.y = margin;
+                w.x = (wId === 'votacion') ? 0 : margin;
+                w.y = (wId === 'votacion') ? 0 : margin;
                 break;
             case 'top-right':
-                w.x = Math.max(0, 1920 - dims.w - margin);
-                w.y = margin;
+                w.x = (wId === 'votacion') ? 0 : Math.max(0, 1920 - dims.w - margin);
+                w.y = (wId === 'votacion') ? 0 : margin;
                 break;
             case 'center':
                 w.x = Math.max(0, Math.round((1920 - dims.w) / 2));
                 w.y = Math.max(0, Math.round((1080 - dims.h) / 2));
                 break;
             case 'bottom-left':
-                w.x = margin;
-                w.y = Math.max(0, 1080 - dims.h - margin);
+                w.x = (wId === 'votacion') ? 0 : margin;
+                w.y = (wId === 'votacion') ? 0 : Math.max(0, 1080 - dims.h - margin);
                 break;
             case 'bottom-right':
-                w.x = Math.max(0, 1920 - dims.w - margin);
-                w.y = Math.max(0, 1080 - dims.h - margin);
+                w.x = (wId === 'votacion') ? 0 : Math.max(0, 1920 - dims.w - margin);
+                w.y = (wId === 'votacion') ? 0 : Math.max(0, 1080 - dims.h - margin);
                 break;
             case 'reset':
                 if (wId === 'chat') { w.x = 1410; w.y = 200; }
                 else if (wId === 'metas') { w.x = 30; w.y = 30; }
                 else if (wId === 'seguidores') { w.x = 30; w.y = 850; }
-                else if (wId === 'votacion') { w.x = 40; w.y = 200; }
+                else if (wId === 'votacion') { w.x = 0; w.y = 0; }
                 else if (wId === 'tts') { w.x = 1520; w.y = 30; }
                 else if (wId === 'logros') { w.x = 1280; w.y = 30; }
                 w.scale = 100;
@@ -936,12 +959,15 @@ class MasterDockController {
     saveCustomPreset(slot) {
         if (!this.state.customPresets) this.state.customPresets = {};
         this.state.customPresets[`preset${slot}`] = JSON.parse(JSON.stringify(this.state.widgets));
+        this.state.activePresetSlot = slot;
         this.saveState();
 
         const btnLoad = document.getElementById(`btnLoadPreset${slot}`);
         if (btnLoad) {
             btnLoad.style.borderColor = 'var(--neon-green, #00ff88)';
             btnLoad.style.color = '#00ff88';
+            document.querySelectorAll('.btn-preset-load').forEach(b => b.classList.remove('active'));
+            btnLoad.classList.add('active');
         }
 
         this.showToast(`💾 Preset P${slot} guardado`);
@@ -952,6 +978,13 @@ class MasterDockController {
         if (!saved) {
             this.showToast(`⚠️ Preset P${slot} vacío. Pulsa 💾 para guardarlo primero.`);
             return;
+        }
+
+        this.state.activePresetSlot = slot;
+        document.querySelectorAll('.btn-preset-load').forEach(b => b.classList.remove('active'));
+        const btnActive = document.getElementById(`btnLoadPreset${slot}`);
+        if (btnActive) {
+            btnActive.classList.add('active');
         }
 
         this.state.widgets = JSON.parse(JSON.stringify(saved));
@@ -984,6 +1017,25 @@ class MasterDockController {
         if (data) {
             this.emit('dock:testEvent', data);
             this.showToast(`🧪 Test disparado: ${type.toUpperCase()}`);
+        }
+    }
+
+    updateTtsMuteIcon() {
+        const isMuted = Boolean(this.state.audio && this.state.audio.ttsMuted);
+        const icon = isMuted ? '🔇' : '🔊';
+        const btnMute = document.getElementById('btnTtsMuteToggle');
+        if (btnMute) {
+            btnMute.textContent = icon;
+            btnMute.title = isMuted ? 'TTS Silenciado (Clic para activar)' : 'TTS Activo (Clic para silenciar)';
+            btnMute.style.filter = isMuted ? 'drop-shadow(0 0 5px var(--magenta))' : 'drop-shadow(0 0 5px var(--green-glow))';
+        }
+        const tabIcon = document.getElementById('tabAudioIcon');
+        if (tabIcon) {
+            tabIcon.textContent = icon;
+        }
+        const tMute = document.getElementById('toggle_tts_mute');
+        if (tMute) {
+            tMute.checked = isMuted;
         }
     }
 

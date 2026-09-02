@@ -49,6 +49,11 @@ graph LR
 7. **⚡ Arquitectura de Comunicación de Ultra-Baja Latencia:**
    - Implementación de **`BroadcastChannel` API** + **LocalStorage Events** entre el OBS Dock y las Browser Sources para latencia 0 ms sin dependencias complejas.
 
+8. **🔍 Revisar todas las opciones, terminar de ajustar el diseño y revisar que nada falle:**
+   - Auditoría exhaustiva de todas las opciones, controles y botones del Master Dock y overlays.
+   - Ajustes finales de diseño, micro-animaciones y alineaciones visuales.
+   - Comprobación rigurosa de estabilidad para garantizar que ningún módulo o bus falle en stream.
+
 ---
 
 ### 🎯 Fase 1: Transición Definitiva de Logros a `Achievements-view.html`

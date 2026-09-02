@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manual de Configuración - Twitch Cyberpunk Overlay</title>
+    <title>Manual de Configuración - Overlays Mithands Ecosistema</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -90,7 +90,7 @@
         .subtitle {
             font-size: 1.15rem;
             color: var(--text-muted);
-            max-width: 700px;
+            max-width: 750px;
             margin: 0 auto;
         }
 
@@ -342,8 +342,8 @@
         <!-- HEADER -->
         <header class="header">
             <span class="badge-header">Guía Oficial de Despliegue</span>
-            <h1>MANUAL DE CONFIGURACIÓN</h1>
-            <p class="subtitle">Aprende a desplegar este ecosistema interactivo de overlays en cualquier nuevo canal de Twitch con base de datos de XP y rankings 100% independientes.</p>
+            <h1>MANUAL DE CONFIGURACIÓN DE NUEVO CANAL</h1>
+            <p class="subtitle">Aprende a configurar el ecosistema unificado de overlays (Chat & XP, Bot TTS, Metas, Seguidores, Votaciones y Master Dock) en cualquier nuevo canal de Twitch.</p>
         </header>
 
         <!-- RESUMEN EN 4 PASOS -->
@@ -351,29 +351,29 @@
             <div class="summary-item">
                 <div class="summary-icon">⏱️</div>
                 <div class="summary-text">
-                    <h4>TIEMPO TOTAL</h4>
-                    <p>Menos de 5 minutos</p>
+                    <h4>TIEMPO ESTIMADO</h4>
+                    <p>5 minutos</p>
+                </div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-icon">⚡</div>
+                <div class="summary-text">
+                    <h4>SERVIDOR OCULTO</h4>
+                    <p>Inicio Automático</p>
                 </div>
             </div>
             <div class="summary-item">
                 <div class="summary-icon">☁️</div>
                 <div class="summary-text">
-                    <h4>ALMACENAMIENTO</h4>
+                    <h4>BASE DE DATOS</h4>
                     <p>GitHub Gist (Gratis)</p>
                 </div>
             </div>
             <div class="summary-item">
-                <div class="summary-icon">🔒</div>
+                <div class="summary-icon">🎛️</div>
                 <div class="summary-text">
-                    <h4>PRIVACIDAD</h4>
-                    <p>100% Aislado y Seguro</p>
-                </div>
-            </div>
-            <div class="summary-item">
-                <div class="summary-icon">🎬</div>
-                <div class="summary-text">
-                    <h4>INTEGRACIÓN</h4>
-                    <p>OBS Studio Navegador</p>
+                    <h4>CONTROL EN VIVO</h4>
+                    <p>Dock OBS Studio</p>
                 </div>
             </div>
         </div>
@@ -382,21 +382,49 @@
         <div class="step-card">
             <div class="step-header">
                 <div class="step-num">1</div>
-                <h2 class="step-title">Configurar el Nombre del Canal de Twitch</h2>
+                <h2 class="step-title">Configurar el Nombre del Canal en los 4 Módulos</h2>
             </div>
             <div class="step-content">
-                <p>El primer paso es indicar a qué canal de Twitch debe escuchar el widget para procesar los mensajes del chat y sumar experiencia:</p>
-                <ol>
-                    <li>Dirígete a la carpeta: <code class="cyan-text">Overlay-principal/Widget-chat/js/</code></li>
-                    <li>Si no existe el archivo <strong>config.js</strong>, copia <strong>config.example.js</strong> y renómbralo a <strong>config.js</strong>.</li>
-                    <li>Abre <strong>config.js</strong> con cualquier editor de texto o Bloc de Notas y modifica la línea del canal:</li>
-                </ol>
+                <p>Para que cada widget escuche a tu comunidad de Twitch, actualiza el nombre de tu canal en estos archivos:</p>
+                
+                <h4 style="margin-top: 14px; color: var(--cyan); font-family: var(--font-display);">1.1 Chat Principal & Niveles XP</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Ruta: <code>Overlay-principal/Widget-chat/js/config.js</code></p>
                 <div class="code-block">
                     <div class="code-header">
                         <span>Overlay-principal/Widget-chat/js/config.js</span>
                         <button class="copy-btn" onclick="copyCode(this, 'code-channel')">Copiar</button>
                     </div>
-                    <pre><code id="code-channel"><span class="code-key">CHANNEL_NAME</span>: <span class="code-string">'nombre_del_nuevo_canal'</span>, <span class="code-comment">// Escribe el usuario de Twitch en minúsculas</span></code></pre>
+                    <pre><code id="code-channel"><span class="code-key">CHANNEL_NAME</span>: <span class="code-string">'tu_canal_aqui'</span>, <span class="code-comment">// Usuario de Twitch en minúsculas</span></code></pre>
+                </div>
+
+                <h4 style="margin-top: 14px; color: var(--cyan); font-family: var(--font-display);">1.2 Bot de Voz TTS (Audio en Vivo)</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Ruta: <code>Overlay-principal/Bot-tts/js/overlay.js</code> (Línea 20)</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Overlay-principal/Bot-tts/js/overlay.js</span>
+                        <button class="copy-btn" onclick="copyCode(this, 'code-tts')">Copiar</button>
+                    </div>
+                    <pre><code id="code-tts"><span class="code-key">const</span> CHANNEL_NAME = <span class="code-string">'tu_canal_aqui'</span>;</code></pre>
+                </div>
+
+                <h4 style="margin-top: 14px; color: var(--cyan); font-family: var(--font-display);">1.3 Barra de Metas de Seguidores</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Ruta: <code>Overlay-principal/Widget-meta/config.js</code> (Línea 6)</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Overlay-principal/Widget-meta/config.js</span>
+                        <button class="copy-btn" onclick="copyCode(this, 'code-meta')">Copiar</button>
+                    </div>
+                    <pre><code id="code-meta"><span class="code-key">CHANNEL</span>: <span class="code-string">'tu_canal_aqui'</span>,</code></pre>
+                </div>
+
+                <h4 style="margin-top: 14px; color: var(--cyan); font-family: var(--font-display);">1.4 Feed de Últimos Seguidores</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Ruta: <code>Overlay-principal/Widget-seguidores/app.js</code> (Línea 7)</p>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Overlay-principal/Widget-seguidores/app.js</span>
+                        <button class="copy-btn" onclick="copyCode(this, 'code-followers')">Copiar</button>
+                    </div>
+                    <pre><code id="code-followers"><span class="code-key">TWITCH_CHANNEL</span>: <span class="code-string">'tu_canal_aqui'</span>,</code></pre>
                 </div>
             </div>
         </div>
@@ -408,14 +436,14 @@
                 <h2 class="step-title">Crear la Base de Datos en la Nube (GitHub Gist)</h2>
             </div>
             <div class="step-content">
-                <p>Para que los niveles, la experiencia, los logros y las rachas se guarden solos mientras estás en stream de forma gratuita:</p>
+                <p>Para que los niveles, la experiencia, los logros y las rachas se guarden solos mientras estás en stream de forma gratuita y segura:</p>
 
                 <h3 style="margin-top: 15px; color: var(--cyan); font-family: var(--font-display); font-size: 1.05rem;">2.1 Crear el Gist (Tu Base de Datos)</h3>
                 <ol>
                     <li>Inicia sesión en GitHub y entra en <a href="https://gist.github.com/" target="_blank" style="color: var(--cyan); font-weight: bold; text-decoration: none;">gist.github.com ↗</a>.</li>
                     <li>En <strong>Gist description</strong> escribe: <code>Twitch Overlay XP Database</code>.</li>
                     <li>En <strong>Filename including extension</strong> escribe exactamente: <strong class="highlight-text">xp_data.json</strong>.</li>
-                    <li>En el área de texto grande del archivo, copia y pega exactamente esta estructura inicial:</li>
+                    <li>Copia y pega exactamente este JSON inicial:</li>
                 </ol>
 
                 <div class="code-block">
@@ -427,50 +455,38 @@
   <span class="code-key">"users"</span>: {},
   <span class="code-key">"metadata"</span>: {
     <span class="code-key">"version"</span>: <span class="code-string">"2.0.0"</span>,
-    <span class="code-key">"created"</span>: <span class="code-string">"2026-09-02"</span>
+    <span class="code-key">"created"</span>: <span class="code-string">"2026-09-03"</span>
   }
 }</code></pre>
                 </div>
 
                 <ol start="5">
-                    <li>Abajo a la derecha, pulsa en <strong>"Create secret gist"</strong> (o "Create public gist").</li>
-                    <li><strong>Copiar tu Gist ID:</strong> Mira la barra de direcciones de tu navegador. La URL tendrá un formato como este:
+                    <li>Pulsa en <strong>"Create secret gist"</strong> (o "Create public gist").</li>
+                    <li><strong>Copiar tu Gist ID:</strong> Mira la URL en la barra de direcciones de tu navegador:
                         <br>
                         <code style="background: rgba(0,240,255,0.1); padding: 3px 6px; border-radius: 4px; display: inline-block; margin-top: 6px;">https://gist.github.com/tu-usuario/<strong class="highlight-text">7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d</strong></code>
-                        <br>El código alfanumérico largo del final es tu <strong class="cyan-text">GIST_ID</strong>. Guárdalo para el siguiente paso.
+                        <br>El código alfanumérico largo del final es tu <strong class="cyan-text">GIST_ID</strong>.
                     </li>
                 </ol>
 
                 <h3 style="margin-top: 25px; color: var(--cyan); font-family: var(--font-display); font-size: 1.05rem;">2.2 Crear el Token de Acceso (Tu Llave Secreta)</h3>
                 <ol>
-                    <li>En GitHub, haz clic en tu foto de perfil (arriba a la derecha) ➔ <strong>Settings</strong> (Configuración).</li>
+                    <li>En GitHub, haz clic en tu foto de perfil ➔ <strong>Settings</strong> (Configuración).</li>
                     <li>En el menú lateral izquierdo, baja hasta el final y haz clic en <strong>Developer settings</strong>.</li>
                     <li>Entra en <strong>Personal access tokens</strong> ➔ <strong>Tokens (classic)</strong>.</li>
                     <li>Haz clic en <strong>Generate new token</strong> ➔ <strong>Generate new token (classic)</strong>.</li>
                     <li>Rellena los campos:
                         <ul>
                             <li><strong>Note:</strong> <code>Twitch Overlay Token</code></li>
-                            <li><strong>Expiration:</strong> <code>No expiration</code> (o la duración que desees).</li>
+                            <li><strong>Expiration:</strong> <code>No expiration</code>.</li>
                             <li><strong>Select scopes:</strong> Marca únicamente la casilla <strong class="highlight-text">gist</strong> (Create gists).</li>
                         </ul>
                     </li>
-                    <li>Baja al final y pulsa el botón verde <strong>Generate token</strong>.</li>
-                    <li><strong>Copia tu token generado</strong> (empieza por <code>ghp_...</code>).</li>
+                    <li>Pulsa en <strong>Generate token</strong> y copia tu token generado (empieza por <code>ghp_...</code>).</li>
                 </ol>
-                <div class="alert">
-                    <strong>IMPORTANTE:</strong> GitHub solo te muestra este token una vez. Guárdalo en un lugar seguro.
-                </div>
-            </div>
-        </div>
 
-        <!-- PASO 3 -->
-        <div class="step-card">
-            <div class="step-header">
-                <div class="step-num">3</div>
-                <h2 class="step-title">Pegar las Credenciales en config.js</h2>
-            </div>
-            <div class="step-content">
-                <p>Abre de nuevo el archivo <code class="cyan-text">Overlay-principal/Widget-chat/js/config.js</code> y rellena los campos de la sección <strong>GIST_STORAGE</strong>:</p>
+                <h3 style="margin-top: 25px; color: var(--cyan); font-family: var(--font-display); font-size: 1.05rem;">2.3 Pegar Credenciales en config.js</h3>
+                <p>Abre <code>Overlay-principal/Widget-chat/js/config.js</code> y completa la sección <strong>GIST_STORAGE</strong>:</p>
 
                 <div class="code-block">
                     <div class="code-header">
@@ -485,18 +501,11 @@
     <span class="code-key">FILENAME</span>: <span class="code-string">'xp_data.json'</span>,
     <span class="code-key">SYNC_INTERVAL</span>: <span class="code-num">30000</span>,
     <span class="code-key">AUTO_BACKUP</span>: <span class="code-bool">true</span>
-},</code></pre>
-                </div>
+},
 
-                <p style="margin-top: 15px;">En la lista de <strong>EXCLUDED_TOP_USERS</strong>, asegúrate de poner tu propio nombre de canal para que no compitas contra tus espectadores en los tops:</p>
-
-                <div class="code-block">
-                    <div class="code-header">
-                        <span>Filtro de Exclusiones</span>
-                        <button class="copy-btn" onclick="copyCode(this, 'code-excluded')">Copiar</button>
-                    </div>
-                    <pre><code id="code-excluded"><span class="code-key">EXCLUDED_TOP_USERS</span>: [
-    <span class="code-string">'nombre_del_nuevo_canal'</span>, <span class="code-comment">// Tu propio canal</span>
+<span class="code-comment">// Excluye a ti mismo y a tus bots de los podios de !top</span>
+<span class="code-key">EXCLUDED_TOP_USERS</span>: [
+    <span class="code-string">'tu_canal_aqui'</span>,
     <span class="code-string">'streamlabs'</span>,
     <span class="code-string">'streamelements'</span>,
     <span class="code-string">'nightbot'</span>
@@ -505,28 +514,68 @@
             </div>
         </div>
 
+        <!-- PASO 3 -->
+        <div class="step-card">
+            <div class="step-header">
+                <div class="step-num">3</div>
+                <h2 class="step-title">Activar el Inicio Automático y Oculto del Servidor</h2>
+            </div>
+            <div class="step-content">
+                <p>Para no tener que iniciar el servidor manualmente cada vez que vayas a streamear y para que <strong>se ejecute de forma 100% invisible en segundo plano (sin ventanas de terminal abiertas)</strong>:</p>
+                <ol>
+                    <li>En la carpeta principal del proyecto, haz doble clic en <strong class="highlight-text"><code>Activar_Inicio_Automatico.bat</code></strong>.</li>
+                    <li>Este script configurará dos funciones de inmediato:
+                        <ul>
+                            <li>Inicia el servidor local en segundo plano en <code class="cyan-text">http://localhost:3000</code>.</li>
+                            <li>Instala un acceso directo invisible en el Inicio de Windows para que se levante solo al encender tu equipo.</li>
+                        </ul>
+                    </li>
+                </ol>
+                <div class="alert alert-success">
+                    <strong>¡LISTO Y AUTOMATIZADO!</strong> El servidor se ejecutará en silencio en el puerto 3000. Ya puedes abrir OBS directamente sin preocuparte por iniciar nada a mano.
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 10px;">
+                    <em>(Nota: Si algún día deseas detenerlo o quitarlo del inicio, dispones de <code>Detener_Servidor.bat</code> y <code>Desactivar_Inicio_Automatico.bat</code> en la misma carpeta).</em>
+                </p>
+            </div>
+        </div>
+
         <!-- PASO 4 -->
         <div class="step-card">
             <div class="step-header">
                 <div class="step-num">4</div>
-                <h2 class="step-title">Añadir la Fuente en OBS Studio</h2>
+                <h2 class="step-title">Configuración en OBS Studio (Lienzo y Panel Dock)</h2>
             </div>
             <div class="step-content">
+                <h3 style="color: var(--cyan); font-family: var(--font-display); font-size: 1.05rem;">4.1 Añadir el Lienzo Unificado (Overlay en Escena)</h3>
+                <p>No necesitas añadir 6 fuentes separadas; todo el stream se proyecta desde una única fuente coordinada:</p>
                 <ol>
-                    <li>Abre <strong>OBS Studio</strong>.</li>
-                    <li>En tu escena de streaming, haz clic en el botón <strong>+</strong> en el panel de <strong>Fuentes</strong>.</li>
-                    <li>Selecciona la opción <strong>Navegador</strong> (<em>Browser Source</em>).</li>
-                    <li>Ponle de nombre <code class="cyan-text">Chat & XP Overlay</code>.</li>
-                    <li>En la ventana de configuración:
+                    <li>En OBS Studio, en tu Escena, pulsa en <strong>+</strong> en el panel de <strong>Fuentes</strong>.</li>
+                    <li>Elige <strong>Navegador</strong> (<em>Browser Source</em>) y nómbrala <code>Lienzo Overlays Mithands</code>.</li>
+                    <li>Configura los siguientes campos:
                         <ul>
-                            <li>✅ Marca la casilla <strong>"Archivo local"</strong> (<em>Local file</em>).</li>
-                            <li>Haz clic en <strong>Examinar</strong> y busca el archivo <strong class="highlight-text">index.html</strong> (ubicado en <code>Overlay-principal/Widget-chat/index.html</code>).</li>
-                            <li><strong>Ancho (Width):</strong> <code>1920</code> (o <code>450</code> si solo usarás la columna del chat).</li>
-                            <li><strong>Alto (Height):</strong> <code>1080</code> (o <code>800</code> para solo chat).</li>
-                            <li>✅ Marca la casilla <strong>"Controlar audio a través de OBS"</strong>.</li>
+                            <li><strong>URL:</strong> <code class="highlight-text">http://localhost:3000/Overlay-principal/index.html</code></li>
+                            <li><strong>Ancho (Width):</strong> <code>1920</code></li>
+                            <li><strong>Alto (Height):</strong> <code>1080</code></li>
+                            <li>✅ Marca <strong>"Controlar audio a través de OBS"</strong> (para mezclar el sonido del TTS y alertas).</li>
+                            <li>✅ Marca <strong>"Actualizar el navegador cuando la escena se active"</strong>.</li>
                         </ul>
                     </li>
                     <li>Pulsa en <strong>Aceptar</strong>.</li>
+                </ol>
+
+                <h3 style="margin-top: 20px; color: var(--cyan); font-family: var(--font-display); font-size: 1.05rem;">4.2 Añadir el Master Control Dock (Panel Integrado)</h3>
+                <p>Para controlar posiciones, visibilidad, metas, votaciones y sonido en directo sin salir de OBS:</p>
+                <ol>
+                    <li>En el menú superior de OBS Studio, haz clic en <strong>Paneles (Docks)</strong> ➔ <strong>Paneles de navegador personalizados...</strong></li>
+                    <li>En la ventana emergente, añade una fila:
+                        <ul>
+                            <li><strong>Nombre del panel:</strong> <code>Master Dock</code></li>
+                            <li><strong>URL:</strong> <code class="highlight-text">http://localhost:3000/Panel-control/master-dock.html</code></li>
+                        </ul>
+                    </li>
+                    <li>Haz clic en <strong>Aplicar</strong>.</li>
+                    <li>Se abrirá el dock interactivo. Puedes arrastrarlo y anclarlo en cualquier lateral de OBS.</li>
                 </ol>
             </div>
         </div>
@@ -535,42 +584,42 @@
         <div class="step-card">
             <div class="step-header">
                 <div class="step-num">5</div>
-                <h2 class="step-title">Comprobación en Vivo y Comandos</h2>
+                <h2 class="step-title">Comandos de Chat y Pruebas</h2>
             </div>
             <div class="step-content">
-                <p>Una vez iniciado tu stream o abriendo el archivo de pruebas <code class="cyan-text">Overlay-principal/Widget-chat/test-panel.html</code>, puedes probar estos comandos interactivos en el chat:</p>
+                <p>Tu comunidad de Twitch puede interactuar inmediatamente mediante estos comandos:</p>
 
                 <table class="commands-table">
                     <thead>
                         <tr>
                             <th>COMANDO</th>
-                            <th>FUNCIÓN</th>
+                            <th>DESCRIPCIÓN</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><span class="cmd-tag">!nivel</span> o <span class="cmd-tag">!nivel @user</span></td>
-                            <td>Muestra el nivel global, progreso de XP, racha activa y puesto en la Liga Mensual.</td>
+                            <td><span class="cmd-tag">!nivel</span> / <span class="cmd-tag">!nivel @user</span></td>
+                            <td>Muestra la tarjeta de nivel cyberpunk, progreso de XP, racha activa y puesto en la Liga Mensual.</td>
                         </tr>
                         <tr>
                             <td><span class="cmd-tag">!topmes</span></td>
                             <td>Muestra el podio oficial de la Liga Mensual del mes en curso (solo seguidores).</td>
                         </tr>
                         <tr>
-                            <td><span class="cmd-tag">!top</span> o <span class="cmd-tag">!topxp</span></td>
+                            <td><span class="cmd-tag">!top</span> / <span class="cmd-tag">!topxp</span></td>
                             <td>Muestra el Top 3 de nivel y experiencia acumulada histórica.</td>
                         </tr>
                         <tr>
-                            <td><span class="cmd-tag">!toplurk</span> o <span class="cmd-tag">!toptiempo</span></td>
-                            <td>Muestra el Top 3 de tiempo de visualización acumulado en streams.</td>
-                        </tr>
-                        <tr>
                             <td><span class="cmd-tag">!topracha</span></td>
-                            <td>Muestra el Top 3 de rachas activas de días seguidos participando.</td>
+                            <td>Muestra los espectadores con mayor racha de directos seguidos.</td>
                         </tr>
                         <tr>
                             <td><span class="cmd-tag">!racha</span></td>
-                            <td>Consulta tus días consecutivos de racha y tu multiplicador actual (x1.0 a x3.0).</td>
+                            <td>Consulta tus días consecutivos de racha y multiplicador activo.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="cmd-tag">!tts &lt;texto&gt;</span></td>
+                            <td>Lee el mensaje en voz alta en directo por el Bot TTS.</td>
                         </tr>
                         <tr>
                             <td><span class="cmd-tag">!ayuda</span></td>
@@ -580,14 +629,14 @@
                 </table>
 
                 <div class="alert alert-success">
-                    <strong>¡SISTEMA LISTO!</strong> Todos los puntos de experiencia, niveles, rachas y rankings se sincronizarán solos en la nube cada 30 segundos.
+                    <strong>¡CONFIGURACIÓN COMPLETADA!</strong> El sistema sincronizará la experiencia en la nube cada 30 segundos y responderá en tiempo real a los controles del Master Dock.
                 </div>
             </div>
         </div>
 
         <!-- FOOTER -->
         <footer class="footer">
-            <p>SISTEMA DE OVERLAYS CYBERPUNK • VERSIÓN 2.8 • MITHANDS STREAM TOOLS</p>
+            <p>SISTEMA DE OVERLAYS CYBERPUNK • VERSIÓN 1.9.5 • MITHANDS STREAM TOOLS</p>
         </footer>
     </div>
 

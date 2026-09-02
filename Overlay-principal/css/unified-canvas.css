@@ -44,6 +44,7 @@ html, body {
     width: 480px;
     height: 850px;
     transform: translate(1410px, 200px);
+    z-index: 10;
 }
 
 /* 2. Metas Bar */
@@ -51,6 +52,7 @@ html, body {
     width: 540px;
     height: 220px;
     transform: translate(30px, 30px);
+    z-index: 15;
 }
 
 /* 3. Últimos Seguidores */
@@ -58,13 +60,17 @@ html, body {
     width: 480px;
     height: 240px;
     transform: translate(30px, 850px);
+    z-index: 15;
 }
 
-/* 4. Votaciones */
+/* 4. Votaciones (Siempre por encima de todo - Pantalla Completa 1920x1080) */
 #slot-votacion {
-    width: 1000px;
-    height: 680px;
-    transform: translate(40px, 200px);
+    width: 1920px;
+    height: 1080px;
+    top: 0;
+    left: 0;
+    transform: translate(0px, 0px);
+    z-index: 99999 !important; /* Siempre encima de todos los demás widgets */
 }
 
 /* 5. TTS Overlay */
@@ -73,6 +79,7 @@ html, body {
     height: 120px;
     transform: translate(1520px, 30px);
     opacity: 0.9;
+    z-index: 20;
 }
 
 /* 6. Alertas de Logros Cyberpunk Standalone */
@@ -80,6 +87,7 @@ html, body {
     width: 600px;
     height: 300px;
     transform: translate(1280px, 30px);
+    z-index: 30;
 }
 
 /* Modo de Calibración / Ajuste Visual en Vivo (Activo por 6 segundos al mover) */
