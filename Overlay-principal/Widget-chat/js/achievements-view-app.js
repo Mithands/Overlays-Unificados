@@ -10,6 +10,18 @@ class AchievementsViewApp {
         this.audioElement = new Audio('sounds/logro.mp3');
         this.audioElement.volume = 0.8;
 
+        // Cargar volumen guardado del Master Dock
+        try {
+            const saved = localStorage.getItem('mithands_master_dock_state_v1');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.audio && parsed.audio.chatSfxVolume !== undefined) {
+                    const vol = (parseFloat(parsed.audio.chatSfxVolume) || 100) / 100;
+                    this.audioElement.volume = parsed.audio.chatSfxMuted ? 0 : Math.max(0, Math.min(1, vol));
+                }
+            }
+        } catch (e) {}
+
         this.queue = [];
         this.isProcessing = false;
         this.DISPLAY_DURATION = 8000; // 8 segundos por alerta
@@ -29,11 +41,42 @@ class AchievementsViewApp {
                         this.enqueue(event.data.data);
                     }
                 };
-                console.log('📡 BroadcastChannel "mithands_achievements_channel" conectado con éxito.');
+
+                this.dockBus = new BroadcastChannel('stream_master_dock_bus');
+                this.dockBus.onmessage = (event) => {
+                    if (!event.data) return;
+                    if (event.data.type === 'dock:testEvent' && event.data.data && event.data.data.event === 'achievement') {
+                        this.enqueue(event.data.data);
+                    } else if (event.data.type === 'dock:sfxControl' && event.data.data) {
+                        if (event.data.data.chatSfxVolume !== undefined) {
+                            const vol = (parseFloat(event.data.data.chatSfxVolume) || 0) / 100;
+                            this.audioElement.volume = event.data.data.chatSfxMuted ? 0 : Math.max(0, Math.min(1, vol));
+                        }
+                    } else if (event.data.type === 'dock:syncAll' && event.data.data && event.data.data.audio) {
+                        if (event.data.data.audio.chatSfxVolume !== undefined) {
+                            const vol = (parseFloat(event.data.data.audio.chatSfxVolume) || 0) / 100;
+                            this.audioElement.volume = event.data.data.audio.chatSfxMuted ? 0 : Math.max(0, Math.min(1, vol));
+                        }
+                    }
+                };
+                console.log('📡 BroadcastChannel conectado con éxito en Achievements View.');
             }
         } catch (e) {
             console.warn('⚠️ Error conectando BroadcastChannel:', e);
         }
+
+        // Escuchar postMessage directo
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'dock:testEvent' && event.data.data && event.data.data.event === 'achievement') {
+                this.enqueue(event.data.data);
+            } else if (event.data && event.data.type === 'widget:calibrationPreview') {
+                if (event.data.active && event.data.widgetId === 'logros') {
+                    this.showCalibrationMock();
+                } else {
+                    this.hideCalibrationMock();
+                }
+            }
+        });
 
         // 2. Fallback vía Storage Event
         window.addEventListener('storage', (event) => {
@@ -156,6 +199,60 @@ class AchievementsViewApp {
             }, this.FADE_DURATION);
 
         }, this.DISPLAY_DURATION);
+    }
+
+    /**
+     * Muestra una tarjeta de vista previa Cyberpunk durante el ajuste de posición
+     */
+    showCalibrationMock() {
+        if (this.mockCard) return; // Ya mostrándose
+
+        const card = document.createElement('div');
+        card.className = 'cp-achievement-card active';
+        card.setAttribute('data-rarity', 'legendary');
+
+        card.innerHTML = `
+            <div class="cp-deco-corner">ACH.SYS//CALIBRACIÓN</div>
+            <div class="cp-icon-frame">
+                <img src="img/logros/first_hack.png" alt="Logro" onerror="this.onerror=null;this.src='img/logros/default.png';">
+            </div>
+            <div class="cp-content-frame">
+                <div class="cp-meta-row">
+                    <span class="cp-header-tag">LOGRO DESBLOQUEADO</span>
+                    <span class="cp-user-badge">MERC: Mithands</span>
+                </div>
+                <div class="cp-title-row">FIRST HACK // VISTA PREVIA</div>
+                <div class="cp-desc-row">
+                    <span>Posiciona la alerta en directo con el panel de control.</span>
+                    <span class="cp-condition-tag">[VISTA PREVIA ACTIVA]</span>
+                </div>
+            </div>
+            <div class="cp-timer-bar"></div>
+        `;
+
+        this.mockCard = card;
+        if (this.container) {
+            this.container.appendChild(card);
+        }
+    }
+
+    /**
+     * Oculta la tarjeta de calibración al terminar los 6 segundos
+     */
+    hideCalibrationMock() {
+        if (!this.mockCard) return;
+
+        const card = this.mockCard;
+        this.mockCard = null;
+
+        card.classList.remove('active');
+        card.classList.add('leaving');
+
+        setTimeout(() => {
+            if (card.parentNode) {
+                card.parentNode.removeChild(card);
+            }
+        }, 400);
     }
 }
 

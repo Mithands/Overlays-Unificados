@@ -48,13 +48,18 @@ export default class CommandManager {
                 console.log(`⚡ Executing command: !${commandName} by ${username}`);
             }
             try {
-                command.execute({
+                const result = command.execute({
                     username,
                     args,
                     services: this.services,
                     message,
                     config: this.config
                 });
+                if (result instanceof Promise) {
+                    result.catch(error => {
+                        console.error(`❌ Error in async command !${commandName}:`, error);
+                    });
+                }
             } catch (error) {
                 console.error(`❌ Error executing command !${commandName}:`, error);
             }

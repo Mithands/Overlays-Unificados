@@ -34,7 +34,7 @@ body {
     color: var(--text-bright);
     font-family: 'Rajdhani', sans-serif;
     overflow: hidden;
-    padding: 20px;
+    padding: 10px;
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;

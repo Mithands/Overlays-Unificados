@@ -83,7 +83,7 @@ class TwitchChatManager {
 
       this.ws.onopen = () => {
         const anonNick = `justinfan${Math.floor(10000 + Math.random() * 89999)}`;
-        this.ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+        this.ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership');
         this.ws.send('PASS SCHMOOPIIE');
         this.ws.send(`NICK ${anonNick}`);
         this.ws.send(`JOIN #${this.settings.channel}`);
@@ -109,6 +109,12 @@ class TwitchChatManager {
       this.ws.onclose = () => {
         this.isConnected = false;
         if (this.onStatusChange) this.onStatusChange('disconnected', 'Desconectado');
+        if (!this.reconnectTimer) {
+          this.reconnectTimer = setTimeout(() => {
+            this.reconnectTimer = null;
+            this.connect();
+          }, 3000);
+        }
       };
 
     } catch (e) {
@@ -139,7 +145,9 @@ class TwitchChatManager {
   parseIrcLine(rawLine) {
     // Responder PING de Twitch para mantener conexión viva
     if (rawLine.startsWith('PING')) {
-      this.ws.send('PONG :tmi.twitch.tv');
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send('PONG :tmi.twitch.tv');
+      }
       return;
     }
 
@@ -154,13 +162,22 @@ class TwitchChatManager {
         const spaceIdx = line.indexOf(' ');
         const rawTags = line.substring(1, spaceIdx).split(';');
         for (const tag of rawTags) {
-          const [k, v] = tag.split('=');
-          tags[k] = v || '';
+          const eqIdx = tag.indexOf('=');
+          if (eqIdx !== -1) {
+            tags[tag.substring(0, eqIdx)] = tag.substring(eqIdx + 1);
+          }
         }
         line = line.substring(spaceIdx + 1);
       }
 
-      // Extraer mensaje
+      // Extraer usuario
+      let username = tags['display-name'];
+      if (!username) {
+        const match = line.match(/^:([a-zA-Z0-9_]+)!/);
+        if (match) username = match[1];
+      }
+      username = username || 'anon';
+
       const privMsgIdx = line.indexOf('PRIVMSG');
       if (privMsgIdx === -1) return;
 
@@ -168,8 +185,7 @@ class TwitchChatManager {
       if (colonIdx === -1) return;
 
       const message = line.substring(colonIdx + 1);
-      const username = tags['display-name'] || tags['login'] || 'anon';
-      const color = tags['color'] || '#9146ff';
+      const color = tags['color'] || '#00f0ff';
       const badges = tags['badges'] || '';
 
       // Determinar Rol
@@ -245,16 +261,31 @@ class TwitchChatManager {
       return;
     }
 
+    // 0.1. Filtrar cualquier mensaje que sea un comando de chat (!, /, ., $, ?)
+    const trimmedRaw = (rawMessage || '').trim();
+    const ttsPrefix = this.settings.command.trim().toLowerCase(); // ej: !tts
+
+    // Si empieza por un prefijo de comando y no es !tts, ignorarlo de inmediato
+    if (trimmedRaw.startsWith('!') || trimmedRaw.startsWith('/') || trimmedRaw.startsWith('.') || trimmedRaw.startsWith('$') || trimmedRaw.startsWith('?')) {
+      if (!trimmedRaw.toLowerCase().startsWith(ttsPrefix)) {
+        return; // Es un comando general de bot (!top, !nivel, !xp, !lurk, etc.), NO leer por voz
+      }
+    }
+
     // 1. Validar Permisos de Rol
     if (!this.checkRolePermission(role)) return;
 
-    let speechText = rawMessage.trim();
+    let speechText = trimmedRaw;
 
-    // 2. Validar Comando
+    // 2. Validar y extraer Comando TTS
     if (this.settings.requireCommand) {
-      const cmdPrefix = this.settings.command.trim().toLowerCase();
-      if (!speechText.toLowerCase().startsWith(cmdPrefix)) return;
-      speechText = speechText.substring(cmdPrefix.length).trim();
+      if (!speechText.toLowerCase().startsWith(ttsPrefix)) return;
+      speechText = speechText.substring(ttsPrefix.length).trim();
+    }
+
+    // 2.1. Si el texto resultante empieza por otro comando (ej: "!tts !top"), ignorarlo
+    if (speechText.startsWith('!') || speechText.startsWith('/') || speechText.startsWith('.') || speechText.startsWith('$') || speechText.startsWith('?')) {
+      return;
     }
 
     if (!speechText) return;

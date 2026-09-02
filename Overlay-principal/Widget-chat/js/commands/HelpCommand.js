@@ -9,9 +9,10 @@ export default class HelpCommand extends BaseCommand {
     execute({ username }) {
         const commands = [
             '!nivel [@user]',
-            '!top (o !topxp, !toplurk, !topracha)',
+            '!top (o !topmes, !topxp, !toplurk, !topracha)',
             '!racha [@user]',
             '!logros',
+            '!voto 1|2|3',
             '!stats',
             '!emotes',
             '!uptime'

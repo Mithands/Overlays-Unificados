@@ -12,8 +12,10 @@ import StatsCommand from './commands/StatsCommand.js';
 import UptimeCommand from './commands/UptimeCommand.js';
 import EmotesCommand from './commands/EmotesCommand.js';
 import ShoutoutCommand from './commands/ShoutoutCommand.js';
+import VoteCommand from './commands/VoteCommand.js';
 import CommandManager from './managers/CommandManager.js';
 import AudioManager from './managers/AudioManager.js';
+import DockReceiverService from './services/DockReceiverService.js';
 
 /**
  * App - Bootstrapper de la Aplicación
@@ -23,6 +25,9 @@ class App {
         this.config = CONFIG;
         this.isStreamOnline = null;
         console.log('🚀 Booting Twitch Chat Overlay...');
+
+        // 0. Receptor de Control del Master Dock de OBS (0 ms)
+        this.dockReceiver = new DockReceiverService('chat');
 
         // 1. Instanciar Message Processor
         this.processor = null;
@@ -53,6 +58,7 @@ class App {
             this.commandManager.registerCommand(new UptimeCommand());
             this.commandManager.registerCommand(new EmotesCommand());
             this.commandManager.registerCommand(new ShoutoutCommand());
+            this.commandManager.registerCommand(new VoteCommand());
         }
 
         // 2. Instanciar Twitch Service
@@ -105,6 +111,27 @@ class App {
     onMessageReceived(tags, message) {
         if (!this.processor) return;
         this.processor.process(tags, message);
+
+        // Reenviar al Master Dock y Bot TTS para 100% de fiabilidad en vivo
+        try {
+            const payload = {
+                type: 'chat:message',
+                data: {
+                    username: tags.username || tags['display-name'] || 'Usuario',
+                    displayName: tags['display-name'] || tags.username || 'Usuario',
+                    color: tags.color || '#00f0ff',
+                    badges: tags.badges || {},
+                    role: (tags.badges && tags.badges.broadcaster) ? 'broadcaster' : (tags.mod ? 'mod' : (tags.subscriber ? 'sub' : (tags.vip ? 'vip' : 'all'))),
+                    rawMessage: message
+                },
+                timestamp: Date.now()
+            };
+            if (typeof BroadcastChannel !== 'undefined') {
+                const bus = new BroadcastChannel('stream_master_dock_bus');
+                bus.postMessage(payload);
+            }
+            localStorage.setItem('mithands_dock_event', JSON.stringify(payload));
+        } catch (e) {}
     }
 
     /**

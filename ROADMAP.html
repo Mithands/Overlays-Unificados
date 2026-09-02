@@ -400,6 +400,17 @@
             box-shadow: 0 0 20px rgba(255, 0, 85, 0.25);
         }
 
+        .phase-card.highlight-purple {
+            border-color: #b464ff;
+            box-shadow: 0 0 20px rgba(180, 100, 255, 0.2);
+        }
+
+        .phase-card.highlight-purple .phase-badge {
+            background: rgba(180, 100, 255, 0.15);
+            border-color: #b464ff;
+            color: #d8b4fe;
+        }
+
         .phase-header {
             padding: 16px 20px;
             background: rgba(0, 0, 0, 0.3);
@@ -749,6 +760,7 @@
             <button class="phase-nav-btn" data-phase="fase3">Fase 3: Tops & Gist</button>
             <button class="phase-nav-btn highlight" data-phase="fase4">⭐ Fase 4: Master Dock OBS</button>
             <button class="phase-nav-btn highlight-red" data-phase="fase5">🔥 Fase 5: Web & Logs</button>
+            <button class="phase-nav-btn" data-phase="fase6" style="border-color: rgba(180,100,255,0.4); color: #d8b4fe;">🔮 Fase 6: Cambios Futuros</button>
         </nav>
 
         <!-- CONTROLS & SUBFILTERS -->
@@ -810,11 +822,12 @@
                 title: 'Análisis y Rediseño del Sistema de Tops / Leaderboards',
                 description: 'Optimizar la persistencia en GitHub Gist (GistPersistenceService.js) y la proyección de rankings en directo.',
                 tasks: [
-                    { id: 't3_1', text: 'Añadir comandos interactivos de chat (!top, !topxp, !toplurk, !topracha, !nivel @user)', details: 'Permitir a los espectadores consultar el ranking y perfiles en vivo.', done: true, tag: 'CORE' },
-                    { id: 't3_2', text: 'Implementar nuevos criterios de ranking (Top First Hackers, Top Rachas activas)', details: 'Diversificar los reconocimientos en el stream.', done: false, tag: 'CORE' },
-                    { id: 't3_3', text: 'Diseñar sistema de reset de temporadas sin perder historial acumulado', details: 'Permitir temporadas competitivas mensuales.', done: false, tag: 'CORE' },
+                    { id: 't3_1', text: 'Añadir comandos interactivos de chat (!top, !topmes, !topxp, !toplurk, !topracha, !nivel @user)', details: 'Permitir a los espectadores consultar el ranking y perfiles en vivo.', done: true, tag: 'CORE' },
+                    { id: 't3_2', text: 'Implementar nuevos criterios de ranking (Top Mensual !topmes, Top Rachas activas y Watch Time ponderado)', details: 'Diversificar los reconocimientos en el stream y calibrar XP balanceada con anti-spam.', done: true, tag: 'CORE' },
+                    { id: 't3_3', text: 'Diseñar e implementar sistema de reset de temporadas sin perder historial acumulado', details: 'Liga Mensual automática con doble bolsa de XP (Histórica y Mensual).', done: true, tag: 'CORE' },
                     { id: 't3_4', text: 'Filtro y Exclusión Global de Tops (Streamer, Cuentas secundarias y Bots)', details: 'Exclusión automática de mithands, playmithttv y bots de todos los rankings de XP, Watch Time y Actividad.', done: true, tag: 'CORE' },
-                    { id: 't3_5', text: 'Ajustar pantallas de Top en el Widget inactivo (Alternar o proyectar Top XP y Top Lurk claramente)', details: 'Permitir mostrar el Top General de XP / Nivel además o en lugar del Top de Watch Time en el overlay.', done: false, tag: 'UI' }
+                    { id: 't3_5', text: 'Filtro Exclusivo de Seguidores en Tops y Podios Públicos', details: 'Comprobación automática contra la API de Twitch para que solo los seguidores del canal aparezcan en los podios de !top, !topmes, !topxp, !topracha y !toplurk.', done: true, tag: 'CORE' },
+                    { id: 't3_6', text: 'Ajustar pantallas de Top en el Widget inactivo (Alternar o proyectar Top XP y Top Lurk claramente)', details: 'Permitir mostrar el Top General de XP / Nivel además o en lugar del Top de Watch Time en el overlay.', done: false, tag: 'UI' }
                 ]
             },
             {
@@ -824,16 +837,19 @@
                 title: 'Panel Maestro de Control OBS & Gestión Integral de Widgets (Master Control Dock)',
                 description: 'Panel acoplable dentro de OBS Studio para gestionar, mover, calibrar y testear todos los widgets del canal desde una sola pantalla.',
                 tasks: [
-                    { id: 't4_1', text: 'Crear la interfaz del Master Dock en OBS (HTML/CSS Cyberpunk HUD)', details: 'Panel acoplable nativo en OBS Studio.', done: false, tag: 'OBS' },
-                    { id: 't4_2', text: 'Control de Posicionamiento X/Y, Escala y Opacidad en vivo', details: 'Sliders de ajuste milimétrico para cada widget independiente.', done: false, tag: 'OBS' },
-                    { id: 't4_3', text: 'Sistema de Presets Rápidos (Modo Gaming, Just Chatting, Torneo)', details: 'Cambiar de layout completo con un solo clic.', done: false, tag: 'OBS' },
-                    { id: 't4_4', text: 'Botones de anclaje rápido (Top-Right, Bottom-Left, Center, etc.)', details: 'Alineación instantánea a esquinas.', done: false, tag: 'UI' },
-                    { id: 't4_5', text: 'Interruptores ON/OFF individuales y botón "Modo Cinemático" (Limpieza de pantalla)', details: 'Ocultar o mostrar widgets con glitch neón.', done: false, tag: 'OBS' },
-                    { id: 't4_6', text: 'Control dinámico de Metas (editar objetivo y textos al vuelo sin tocar código)', details: 'Ajustar la meta de seguidores en vivo.', done: false, tag: 'CORE' },
-                    { id: 't4_7', text: 'Centro de Pruebas y Emulación Rápida (Test Followers, Subs, Cheers, Logros)', details: 'Disparadores de prueba para calibrar overlays.', done: false, tag: 'CORE' },
-                    { id: 't4_8', text: 'Consola unificada de TTS (Volumen maestro, Mute All, salto de cola)', details: 'Integración del Bot-TTS dentro del panel maestro.', done: false, tag: 'CORE' },
-                    { id: 't4_9', text: 'Gestor de Votaciones Interactivas desde el panel', details: 'Lanzar y cerrar encuestas en directo.', done: false, tag: 'CORE' },
-                    { id: 't4_10', text: 'Bus de comunicación ultra-rápido (BroadcastChannel API + LocalStorage)', details: '0 ms de latencia entre el panel de OBS y las fuentes de navegador.', done: false, tag: 'CORE' }
+                    { id: 't4_1', text: 'Crear la interfaz del Master Dock en OBS (HTML/CSS Cyberpunk HUD)', details: 'Panel acoplable nativo en OBS Studio.', done: true, tag: 'OBS' },
+                    { id: 't4_2', text: 'Control de Posicionamiento X/Y, Escala y Opacidad en vivo', details: 'Sliders de ajuste milimétrico para cada widget independiente.', done: true, tag: 'OBS' },
+                    { id: 't4_3', text: 'Sistema de Presets Rápidos (Modo Gaming, Just Chatting, Torneo)', details: 'Cambiar de layout completo con un solo clic.', done: true, tag: 'OBS' },
+                    { id: 't4_4', text: 'Botones de anclaje rápido (Top-Right, Bottom-Left, Center, etc.)', details: 'Alineación instantánea a esquinas.', done: true, tag: 'UI' },
+                    { id: 't4_5', text: 'Interruptores ON/OFF individuales y botón "Modo Cinemático" (Limpieza de pantalla)', details: 'Ocultar o mostrar widgets con glitch neón.', done: true, tag: 'OBS' },
+                    { id: 't4_6', text: 'Control dinámico de Metas (editar objetivo y textos al vuelo sin tocar código)', details: 'Ajustar la meta de seguidores en vivo.', done: true, tag: 'CORE' },
+                    { id: 't4_7', text: 'Centro de Pruebas y Emulación Rápida (Test Followers, Subs, Cheers, Logros)', details: 'Disparadores de prueba para calibrar overlays.', done: true, tag: 'CORE' },
+                    { id: 't4_8', text: 'Consola unificada de TTS (Volumen maestro, Mute All, salto de cola)', details: 'Integración del Bot-TTS dentro del panel maestro.', done: true, tag: 'CORE' },
+                    { id: 't4_9', text: 'Gestor de Votaciones Interactivas desde el panel', details: 'Lanzar y cerrar encuestas en directo.', done: true, tag: 'CORE' },
+                    { id: 't4_10', text: 'Bus de comunicación ultra-rápido (BroadcastChannel API + LocalStorage)', details: '0 ms de latencia entre el panel de OBS y las fuentes de navegador.', done: true, tag: 'CORE' },
+                    { id: 't4_11', text: 'Lienzo Unificado 1920x1080 (Single Browser Source Canvas en Overlay-principal/index.html)', details: 'Unifica Chat, Metas, Seguidores, Votaciones y TTS en una sola fuente de OBS controlada al vuelo por el Master Dock.', done: true, tag: 'OBS' },
+                    { id: 't4_12', text: 'Pulido Integral del Master Dock, Corrección de Errores & Verificación Global', details: 'Revisión y optimización general de todos los módulos del panel (Posicionamiento, Visibilidad, Presets, Gestor de Metas, Control de Audio/TTS, Votaciones interactivas, Disparadores de prueba y estabilidad global en OBS Studio).', done: false, tag: 'OBS' },
+                    { id: 't4_13', text: 'Diseño e Implementación de Panel Micro/Compacto (Micro Master Dock HUD)', details: 'Versión ultracompacta del panel de control para ocupar el mínimo espacio posible en la ventana de OBS Studio ofreciendo máxima funcionalidad rápida.', done: false, tag: 'OBS' }
                 ]
             },
             {
@@ -848,13 +864,30 @@
                     { id: 't5_3', text: 'Compendio interactivo de logros (Achievement Showcase)', details: 'Galería de logros con porcentajes globales.', done: false, tag: 'UI' },
                     { id: 't5_4', text: 'Conexión en directo con GitHub Gist / API para datos en tiempo real', details: 'Sin necesidad de despliegues manuales.', done: false, tag: 'CORE' },
                     { id: 't5_5', text: 'Visor y Telemetría de Errores en Vivo (Error Logger HUD)', details: 'Consola de telemetría que captura errores de JS, fallos de conexión (Twitch WS, Gist API, audio) y alertas para diagnóstico rápido.', done: false, tag: 'CORE' },
-                    { id: 't5_6', text: 'Historial y Registro de Mensajes del Chat (Chat Message History & Replay)', details: 'Sistema de log y visor interactivo para consultar mensajes anteriores, comandos ejecutados y eventos de chat en directo.', done: false, tag: 'UI' }
+                    { id: 't5_6', text: 'Historial y Registro de Mensajes del Chat (Chat Message History & Replay)', details: 'Sistema de log y visor interactivo para consultar mensajes anteriores, comandos ejecutados y eventos de chat en directo.', done: false, tag: 'UI' },
+                    { id: 't5_7', text: 'Sistema de Temas Dinámicos & Identidad Visual Multi-Streamer', details: 'Soporte para múltiples paletas de colores (Cyberpunk, Vaporwave, Crimson, Emerald, Gold) y logo personalizado configurable por streamer desde config.js.', done: false, tag: 'UI' }
+                ]
+            },
+            {
+                id: 'fase6',
+                badge: 'FASE 06 🔮',
+                highlightPurple: true,
+                isFuture: true,
+                title: 'Posibles Cambios Futuros (Alertas Cyberpunk, Subs & Eventos)',
+                description: 'Propuestas de expansión futura para el ecosistema (no computan para el porcentaje actual de completado).',
+                tasks: [
+                    { id: 't6_1', text: 'Sistema de Alertas Cyberpunk en Vivo (Widget independiente o HUD integrado en Chat)', details: 'Banners holográficos animados con efectos glitch y sonido Sci-Fi para eventos en directo.', done: false, tag: 'UI' },
+                    { id: 't6_2', text: 'Captura y Recompensas de Suscripciones y Resubs (Twitch IRC)', details: 'Detección automática de subs con +500 XP y animación destacada.', done: false, tag: 'CORE' },
+                    { id: 't6_3', text: 'Captura de Regalo de Suscripciones (Subgifts & Mystery Gifts)', details: 'Premio de +250 XP por sub regalada para incentivar el apoyo comunitario.', done: false, tag: 'CORE' },
+                    { id: 't6_4', text: 'Detección de Cheers / Bits con XP Proporcional', details: 'Conversión directa de 1 Bit = 1 XP y animación de impacto en pantalla.', done: false, tag: 'CORE' },
+                    { id: 't6_5', text: 'Alertas de Incursiones y Raids de otros Creadores', details: 'Bono de +200 XP al streamer y +50 XP a los espectadores raiders.', done: false, tag: 'CORE' },
+                    { id: 't6_6', text: 'Integración de Nuevos Seguidores (Follows)', details: 'Detección mediante Twitch EventSub o WebSockets con bienvenida de +100 XP.', done: false, tag: 'CORE' }
                 ]
             }
         ];
 
         // Estado y Almacenamiento
-        const STORAGE_KEY = 'mithands_stream_roadmap_v5';
+        const STORAGE_KEY = 'mithands_stream_roadmap_v11';
         let roadmapData = [];
         let currentPhaseFilter = 'all';
         let currentStatusFilter = 'all';
@@ -874,10 +907,12 @@
                                 ...defPhase,
                                 tasks: defPhase.tasks.map(defTask => {
                                     const savedTask = savedPhase.tasks.find(t => t && t.id === defTask.id);
-                                    return savedTask ? { ...defTask, done: Boolean(savedTask.done) } : { ...defTask };
+                                    const isDone = defTask.done || (savedTask ? Boolean(savedTask.done) : false);
+                                    return { ...defTask, done: isDone };
                                 })
                             };
                         });
+                        saveData();
                         return;
                     }
                 }
@@ -905,6 +940,7 @@
             let done = 0;
 
             roadmapData.forEach(phase => {
+                if (phase.isFuture) return; // No computa para el progreso actual
                 phase.tasks.forEach(task => {
                     total++;
                     if (task.done) done++;
@@ -973,8 +1009,12 @@
                 const phasePercent = phaseTotal > 0 ? Math.round((phaseDone / phaseTotal) * 100) : 0;
 
                 const card = document.createElement('div');
-                card.className = `phase-card ${phase.highlight ? 'highlight' : ''} ${phase.highlightRed ? 'highlight-red' : ''}`.trim();
+                card.className = `phase-card ${phase.highlight ? 'highlight' : ''} ${phase.highlightRed ? 'highlight-red' : ''} ${phase.highlightPurple ? 'highlight-purple' : ''}`.trim();
                 card.id = `card_${phase.id}`;
+
+                const progressDisplay = phase.isFuture
+                    ? `<span style="color: #d8b4fe; font-family: var(--font-mono); font-size: 0.85rem; font-weight: bold; background: rgba(180,100,255,0.12); padding: 3px 8px; border-radius: 3px; border: 1px solid rgba(180,100,255,0.3);">🔮 POSIBLES CAMBIOS FUTUROS</span>`
+                    : `<span>${phaseDone}/${phaseTotal} (${phasePercent}%)</span>`;
 
                 // Header
                 const header = document.createElement('div');
@@ -985,7 +1025,7 @@
                         <h2 class="phase-title">${phase.title}</h2>
                     </div>
                     <div class="phase-progress-info">
-                        <span>${phaseDone}/${phaseTotal} (${phasePercent}%)</span>
+                        ${progressDisplay}
                         <span class="phase-toggle-icon">▼</span>
                     </div>
                 `;

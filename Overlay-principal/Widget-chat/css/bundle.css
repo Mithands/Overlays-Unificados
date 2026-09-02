@@ -476,9 +476,13 @@ body {
   perspective-origin: left center;
   position: absolute;
   left: 0;
-  bottom: 20%;
+  bottom: 0px;
   transform: scale(0.95);
   transform-origin: bottom left;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .container {

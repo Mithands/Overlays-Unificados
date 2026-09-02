@@ -1,22 +1,27 @@
-/* Cyberpunk 2077 Level Up Overlay */
+/* Cyberpunk 2077 Level Up Overlay (Posicionado por encima de las redes) */
 .cp-levelup-overlay {
-    position: fixed;
-    top: 50px;
-    left: 0;
+    position: relative;
     width: 100%;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    z-index: 9999;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 10000;
     pointer-events: none;
     opacity: 0;
-    transform: translateY(-20px);
-    transition: opacity 0.3s ease-out, transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    max-height: 0;
+    margin-bottom: 0;
+    overflow: visible;
+    flex-shrink: 0;
+    transform: translateX(0) rotateY(6deg) translateY(-10px) scale(0.95);
+    transform-origin: left center;
+    transition: opacity 0.35s ease-out, transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28), max-height 0.35s ease, margin-bottom 0.35s ease;
 }
 
 .cp-levelup-overlay.show {
     opacity: 1;
-    transform: translateY(0);
+    max-height: 110px;
+    margin-bottom: 8px;
+    transform: translateX(0) rotateY(6deg) translateY(0) scale(1);
 }
 
 .cp-levelup-content {

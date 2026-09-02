@@ -34,6 +34,50 @@ class StreamGoalWidget {
         // 3. Sincronización periódica de respaldo
         const interval = this.config.POLL_INTERVAL || 45000;
         this.pollTimer = setInterval(() => this.fetchTwitchFollowers(), interval);
+
+        // 4. Conectar con el Master Control Dock de OBS (0 ms)
+        this.connectMasterDock();
+    }
+
+    connectMasterDock() {
+        const handleDockMsg = (msg) => {
+            if (!msg || !msg.type) return;
+            if (msg.type === 'dock:goalUpdate' && msg.data) {
+                if (msg.data.followerGoal) {
+                    this.targetGoal = parseInt(msg.data.followerGoal, 10) || this.targetGoal;
+                }
+                if (msg.data.goalTitle) {
+                    const titleEl = document.getElementById('goalTitle');
+                    if (titleEl) titleEl.textContent = msg.data.goalTitle;
+                }
+                this.updateUI(this.currentCount, true);
+            }
+            if (msg.type === 'dock:testEvent' && msg.data && msg.data.event === 'follow') {
+                this.currentCount += 1;
+                this.updateUI(this.currentCount, true);
+            }
+        };
+
+        if (typeof BroadcastChannel !== 'undefined') {
+            try {
+                const bus = new BroadcastChannel('stream_master_dock_bus');
+                bus.onmessage = (e) => handleDockMsg(e.data);
+            } catch (e) {}
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'mithands_dock_event' && e.newValue) {
+                try {
+                    handleDockMsg(JSON.parse(e.newValue));
+                } catch (err) {}
+            }
+        });
+
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type) {
+                handleDockMsg(e.data);
+            }
+        });
     }
 
     setupCustomTexts() {

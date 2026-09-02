@@ -70,31 +70,36 @@ class TTSEngine {
 
   sanitizeText(text) {
     if (!text) return '';
-    let clean = text.trim();
+    try {
+      let clean = String(text).trim();
 
-    // 1. Filtrar URLs
-    if (this.settings.filterUrls) {
-      clean = clean.replace(/https?:\/\/\S+/gi, '');
+      // 1. Filtrar URLs
+      if (this.settings.filterUrls) {
+        clean = clean.replace(/https?:\/\/\S+/gi, '');
+      }
+
+      // 2. Limpiar caracteres repetidos excesivos (ej: 'holaaaaaaa' -> 'holaa', '7777777' -> '77')
+      clean = clean.replace(/(.)\1{2,}/gi, '$1$1');
+
+      // 3. Normalizar puntuación repetida a un solo signo (ej: '????' -> '?', '.....' -> '.', '!!!!' -> '!')
+      clean = clean.replace(/([.!?¿¡,;:])\1+/g, '$1');
+
+      // 4. Limpiar símbolos especiales raros manteniendo letras, acentos, números y puntuación estándar
+      clean = clean.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜàèìòùÀÈÌÒÙäëïöüÄËÏÖÜ\s,;.!?:¿¡'"]/g, ' ');
+
+      // 5. Normalizar espacios múltiples
+      clean = clean.replace(/\s+/g, ' ').trim();
+
+      // 6. Límite de longitud
+      if (clean.length > this.settings.maxChars) {
+        clean = clean.substring(0, this.settings.maxChars);
+      }
+
+      return clean;
+    } catch (e) {
+      console.warn('Error sanitizando texto TTS:', e);
+      return String(text).substring(0, 150);
     }
-
-    // 2. Limpiar caracteres repetidos excesivos (ej: 'holaaaaaaa' -> 'holaa', '7777777' -> '77')
-    clean = clean.replace(/(.)\1{2,}/gi, '$1$1');
-
-    // 3. Normalizar puntuación repetida a un solo signo (ej: '????' -> '?', '.....' -> '.', '!!!!' -> '!')
-    clean = clean.replace(/([.!?¿¡,;:])\1+/g, '$1');
-
-    // 4. Limpiar símbolos especiales raros manteniendo letras, números y puntuación estándar
-    clean = clean.replace(/[^\p{L}\p{N}\s,;.!?:¿¡'"]/gu, ' ');
-
-    // 5. Normalizar espacios múltiples
-    clean = clean.replace(/\s+/g, ' ').trim();
-
-    // 6. Límite de longitud
-    if (clean.length > this.settings.maxChars) {
-      clean = clean.substring(0, this.settings.maxChars);
-    }
-
-    return clean;
   }
 
   addToQueue(item) {
@@ -105,7 +110,7 @@ class TTSEngine {
       id: Date.now() + Math.random().toString(36).substr(2, 5),
       username: item.username || 'Anónimo',
       displayName: item.displayName || item.username || 'Anónimo',
-      color: item.color || '#9146FF',
+      color: item.color || '#ff8c00',
       role: item.role || 'viewer',
       rawMessage: item.message,
       cleanMessage: cleanMessage,
@@ -163,20 +168,18 @@ class TTSEngine {
 
   playNativeTTS(text) {
     if (!('speechSynthesis' in window)) {
-      console.warn('SpeechSynthesis no soportado');
-      this.onFinishedItem();
+      this.playGoogleTTS(text);
       return;
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
     this.currentUtterance = utterance;
 
-    // Retener en ventana global para evitar que el Garbage Collector corte la voz a mitad de frase
     if (!window._activeUtterances) window._activeUtterances = new Set();
     window._activeUtterances.add(utterance);
 
     // Buscar voz seleccionada
-    if (this.settings.voiceUri) {
+    if (this.settings.voiceUri && this.availableVoices.length > 0) {
       const voice = this.availableVoices.find(v => v.voiceURI === this.settings.voiceUri);
       if (voice) {
         utterance.voice = voice;
@@ -190,42 +193,42 @@ class TTSEngine {
     utterance.pitch = Math.max(0.5, Math.min(2.0, parseFloat(this.settings.pitch) || 1.0));
     utterance.volume = Math.max(0, Math.min(1.0, parseFloat(this.settings.volume) || 1.0));
 
-    let hasEnded = false;
-    const cleanup = () => {
-      if (hasEnded) return;
-      hasEnded = true;
+    let isDone = false;
+    let fallbackTimeout = null;
+
+    const finalize = () => {
+      if (isDone) return;
+      isDone = true;
+      if (fallbackTimeout) clearTimeout(fallbackTimeout);
       if (window._activeUtterances) {
         window._activeUtterances.delete(utterance);
       }
       this.onFinishedItem();
     };
 
-    utterance.onend = cleanup;
+    utterance.onend = finalize;
     utterance.onerror = (e) => {
-      // Ignorar cancelaciones intencionadas (skip / clear) para no desfasar la cola
-      if (e && (e.error === 'canceled' || e.error === 'interrupted')) {
-        if (window._activeUtterances) {
-          window._activeUtterances.delete(utterance);
-        }
-        return;
-      }
-      console.error('TTS Error:', e);
-      cleanup();
+      finalize();
     };
 
-    // Si estaba pausado el motor, reanudar
-    if (window.speechSynthesis.paused) {
-      window.speechSynthesis.resume();
-    }
+    fallbackTimeout = setTimeout(() => {
+      finalize();
+    }, Math.max(3000, text.length * 150));
 
-    window.speechSynthesis.speak(utterance);
+    try {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      finalize();
+    }
   }
 
   playGoogleTTS(text) {
     const lang = this.settings.lang ? this.settings.lang.split('-')[0] : 'es';
     const cleanText = encodeURIComponent(text.substring(0, 200));
     
-    // Si se ejecuta mediante http/https con servidor local usa proxy, si se ejecuta como file:/// usa URL directa de Google
     let audioUrl;
     if (typeof window !== 'undefined' && window.location.protocol.startsWith('http')) {
       audioUrl = `/api/tts/google?text=${cleanText}&lang=${lang}`;
@@ -234,7 +237,7 @@ class TTSEngine {
     }
 
     if (this.currentAudioElement) {
-      this.currentAudioElement.pause();
+      try { this.currentAudioElement.pause(); } catch(e) {}
       this.currentAudioElement = null;
     }
 
@@ -247,32 +250,30 @@ class TTSEngine {
     audio.playbackRate = targetRate;
     audio.volume = targetVolume;
 
-    // Asegurar que el navegador aplique la velocidad al cargar el stream de audio
-    audio.addEventListener('loadedmetadata', () => {
-      audio.playbackRate = targetRate;
-    });
-    audio.addEventListener('play', () => {
-      audio.playbackRate = targetRate;
-    });
+    let isDone = false;
+    let fallbackTimeout = null;
 
-    audio.onended = () => {
+    const finalize = () => {
+      if (isDone) return;
+      isDone = true;
+      if (fallbackTimeout) clearTimeout(fallbackTimeout);
       this.currentAudioElement = null;
       this.onFinishedItem();
     };
 
-    audio.onerror = (e) => {
-      console.warn('Fallback a nativo tras fallo de Google TTS:', e);
-      this.currentAudioElement = null;
-      this.playNativeTTS(text);
-    };
+    audio.onended = finalize;
+    audio.onerror = finalize;
 
-    audio.play().then(() => {
-      audio.playbackRate = targetRate;
-    }).catch(e => {
-      console.warn('Audio play error, fallback a nativo:', e);
-      this.currentAudioElement = null;
-      this.playNativeTTS(text);
-    });
+    fallbackTimeout = setTimeout(() => {
+      finalize();
+    }, Math.max(3000, text.length * 150));
+
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        finalize();
+      });
+    }
   }
 
   onFinishedItem() {
@@ -281,7 +282,12 @@ class TTSEngine {
     }
     this.currentUtterance = null;
     this.currentAudioElement = null;
-    this.playNext();
+    this.isPlaying = false;
+    
+    // Pausa mínima de 100ms entre frases para asegurar que el navegador limpie el hilo de audio
+    setTimeout(() => {
+      this.playNext();
+    }, 100);
   }
 
   skipCurrent() {

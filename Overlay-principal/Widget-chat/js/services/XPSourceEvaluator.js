@@ -29,9 +29,11 @@ export default class XPSourceEvaluator {
         let totalXP = 0;
         const xpSources = [];
 
-        // 1. XP Base por mensaje
+        // 1. XP Base por mensaje (Con límite anti-spam tras 15 mensajes del día)
         if (this._isEnabled('MESSAGE')) {
-            const xp = this.xpConfig.sources.MESSAGE.xp;
+            const baseXP = this.xpConfig.sources.MESSAGE.xp;
+            const isSpamCapped = state.todayMessages !== undefined && state.todayMessages >= 15;
+            const xp = isSpamCapped ? 1 : baseXP;
             totalXP += xp;
             xpSources.push({ source: 'MESSAGE', xp });
         }

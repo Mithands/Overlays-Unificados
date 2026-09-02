@@ -23,7 +23,17 @@ export default class LevelCommand extends BaseCommand {
 
         const isSelf = targetUser.toLowerCase() === username.toLowerCase();
         const displayTarget = isSelf ? `@${username}` : `@${username} ➔ @${targetUser}`;
-        const message = `${displayTarget} -> Nivel ${xpInfo.level} | ${xpInfo.title} | XP: ${Math.floor(xpInfo.progress.xpInCurrentLevel)}/${Math.floor(xpInfo.progress.xpNeededForNext)}`;
+        let message = `${displayTarget} -> Nivel ${xpInfo.level} (${xpInfo.title}) • XP: ${Math.floor(xpInfo.progress.xpInCurrentLevel)}/${Math.floor(xpInfo.progress.xpNeededForNext)}`;
+
+        if (xpInfo.streakDays > 0) {
+            message += ` • 🔥 Racha: ${xpInfo.streakDays}d (x${xpInfo.streakMultiplier})`;
+        }
+
+        if (xpInfo.monthlyRank) {
+            message += ` • 🏆 Liga del Mes: #${xpInfo.monthlyRank} (${(xpInfo.monthlyXP || 0).toLocaleString()} XP)`;
+        } else if (xpInfo.monthlyXP > 0) {
+            message += ` • 🏆 Liga del Mes: ${(xpInfo.monthlyXP || 0).toLocaleString()} XP`;
+        }
 
         EventManager.emit('ui:systemMessage', message);
     }

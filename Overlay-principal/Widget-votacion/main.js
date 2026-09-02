@@ -1,21 +1,38 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const voteButtons = document.querySelectorAll(".vote-btn");
-  const progressFills = document.querySelectorAll(".progress-fill");
+  const STORAGE_KEY = "mithands_game_votes_v2";
+  const CHANNEL_NAME = "stream_master_dock_bus";
 
-  if (!localStorage.getItem("gameVotes")) {
-    const initialVotes = {
-      mafia: 0,
-      mafia2: 0,
-      uncharted: 0
-    };
-    localStorage.setItem("gameVotes", JSON.stringify(initialVotes));
+  // Estado por defecto
+  let state = {
+    title: "VOTACIÓN DE JUEGOS",
+    options: {
+      mafia: { name: "Mafia", votes: 0, barColor: "bg-brand-primary" },
+      mafia2: { name: "Mafia 2", votes: 0, barColor: "bg-brand-secondary" },
+      uncharted: { name: "Uncharted", votes: 0, barColor: "bg-brand-primary" }
+    }
+  };
+
+  // Cargar estado guardado si existe
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.options) state = { ...state, ...parsed };
+    }
+  } catch (e) {
+    console.error("Error al cargar votos:", e);
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {}
   }
 
   function updateUI() {
-    const votes = JSON.parse(localStorage.getItem("gameVotes"));
-    const vMafia = votes.mafia || 0;
-    const vMafia2 = votes.mafia2 || 0;
-    const vUncharted = votes.uncharted || 0;
+    const vMafia = state.options.mafia.votes || 0;
+    const vMafia2 = state.options.mafia2.votes || 0;
+    const vUncharted = state.options.uncharted.votes || 0;
     
     const total = vMafia + vMafia2 + vUncharted;
 
@@ -26,102 +43,105 @@ document.addEventListener("DOMContentLoaded", () => {
     if (total > 0) {
       pMafia = Math.round((vMafia / total) * 100);
       pMafia2 = Math.round((vMafia2 / total) * 100);
-      pUncharted = 100 - pMafia - pMafia2;
+      pUncharted = Math.max(0, 100 - pMafia - pMafia2);
     }
 
-    updateDisplay('mafia', pMafia);
-    updateDisplay('mafia2', pMafia2);
-    updateDisplay('uncharted', pUncharted);
+    // Actualizar Títulos de juegos
+    const hMafia = document.querySelector("#card-mafia h3");
+    const hMafia2 = document.querySelector("#card-mafia2 h3");
+    const hUncharted = document.querySelector("#card-uncharted h3");
+    if (hMafia) hMafia.textContent = state.options.mafia.name;
+    if (hMafia2) hMafia2.textContent = state.options.mafia2.name;
+    if (hUncharted) hUncharted.textContent = state.options.uncharted.name;
+
+    // Actualizar barras
+    updateDisplay('mafia', pMafia, vMafia);
+    updateDisplay('mafia2', pMafia2, vMafia2);
+    updateDisplay('uncharted', pUncharted, vUncharted);
   }
 
-  function updateDisplay(game, percentage) {
-    const bar = document.getElementById(`bar-${game}`);
-    const text = document.getElementById(`txt-${game}`);
+  function updateDisplay(gameKey, percentage, voteCount) {
+    const bar = document.getElementById(`bar-${gameKey}`);
+    const text = document.getElementById(`txt-${gameKey}`);
     if (bar && text) {
       bar.style.width = `${percentage}%`;
-      text.innerText = `${percentage}%`;
+      text.innerText = `${percentage}% (${voteCount} votos)`;
     }
   }
 
-  // 3. Handle Voting
-  voteButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const game = button.getAttribute("data-game");
-      const votes = JSON.parse(localStorage.getItem("gameVotes"));
-      
-      // Increment vote
-      votes[game] = (votes[game] || 0) + 1;
-      
-      // Save back to local storage
-      localStorage.setItem("gameVotes", JSON.stringify(votes));
-      
-      // Feedback to user
-      const gameName = button.closest("article").querySelector("h3").innerText;
-      
-      // Trigger update
+  function addVote(gameKey) {
+    if (state.options[gameKey]) {
+      state.options[gameKey].votes += 1;
+      saveState();
       updateUI();
-      
-      // Optional: Add a small bounce effect to the card
-      button.closest("article").classList.add("scale-105");
-      setTimeout(() => {
-        button.closest("article").classList.remove("scale-105");
-      }, 200);
+
+      // Animación de impacto en la tarjeta
+      const card = document.getElementById(`card-${gameKey}`);
+      if (card) {
+        card.classList.add("scale-105");
+        setTimeout(() => card.classList.remove("scale-105"), 300);
+      }
+    }
+  }
+
+  function resetVotes() {
+    Object.keys(state.options).forEach(k => {
+      state.options[k].votes = 0;
     });
+    saveState();
+    updateUI();
+  }
+
+  // 1. Conectar con el Master Control Dock de OBS (0 ms)
+  const handleDockMessage = (msg) => {
+    if (!msg || !msg.type) return;
+
+    if (msg.type === "dock:voteAdd" && msg.data) {
+      addVote(msg.data.gameKey);
+    } else if (msg.type === "dock:voteReset") {
+      resetVotes();
+    } else if (msg.type === "dock:voteUpdate" && msg.data) {
+      if (msg.data.options) {
+        Object.keys(msg.data.options).forEach(k => {
+          if (state.options[k] && msg.data.options[k].name) {
+            state.options[k].name = msg.data.options[k].name;
+          }
+        });
+      }
+      saveState();
+      updateUI();
+    }
+  };
+
+  if (typeof BroadcastChannel !== "undefined") {
+    try {
+      const bus = new BroadcastChannel(CHANNEL_NAME);
+      bus.onmessage = (e) => handleDockMessage(e.data);
+    } catch (e) {}
+  }
+
+  window.addEventListener("storage", (e) => {
+    if (e.key === "mithands_dock_event" && e.newValue) {
+      try {
+        handleDockMessage(JSON.parse(e.newValue));
+      } catch (err) {}
+    }
   });
 
-  // 4. Handle Reset
+  window.addEventListener("message", (e) => {
+    if (e.data && e.data.type) {
+      handleDockMessage(e.data);
+    }
+  });
+
+  // Botón Reset en pantalla
   const resetButton = document.getElementById("reset-votes");
   if (resetButton) {
     resetButton.addEventListener("click", () => {
-      if (confirm("¿Estás seguro de que quieres reiniciar todas las votaciones?")) {
-        localStorage.removeItem("gameVotes");
-        // Re-initialize and update
-        const initialVotes = { mafia: 0, mafia2: 0, uncharted: 0 };
-        localStorage.setItem("gameVotes", JSON.stringify(initialVotes));
-        updateUI();
-        alert("Votaciones reiniciadas.");
-      }
+      resetVotes();
     });
   }
 
-  // Initial UI Update
+  // Inicializar UI
   updateUI();
-
-  // 4. Animate progress bars on load (using the new logic)
-  function animateProgress() {
-    progressFills.forEach((fill) => {
-      const targetWidth = fill.style.width;
-      fill.style.width = "0%";
-      setTimeout(() => {
-        fill.style.width = targetWidth;
-      }, 100);
-    });
-  }
-  
-  // Call animateProgress after a short delay to ensure bars are rendered
-  setTimeout(animateProgress, 500);
-
-  // 5. Intersection Observer for scroll animations
-  const observerOptions = {
-    threshold: 0.1,
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("opacity-100", "translate-y-0");
-        entry.target.classList.remove("opacity-0", "translate-y-10");
-      }
-    });
-  }, observerOptions);
-
-  document.querySelectorAll(".game-card, section").forEach((el) => {
-    el.classList.add(
-      "transition-all",
-      "duration-700",
-      "opacity-0",
-      "translate-y-10",
-    );
-    observer.observe(el);
-  });
 });

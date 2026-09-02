@@ -34,6 +34,9 @@ export default class ExperienceService {
         // Registro de mensajes del día actual (para bonus primer mensaje)
         this.dailyFirstMessage = new Map();
 
+        // Caché de estado de seguidores de Twitch (para filtrar Tops de seguidores)
+        this.followerCache = new Map(); // username -> { isFollower: boolean, timestamp: number }
+
         // Queues y Locks (Ahora gestionados por PersistenceManager)
         this.isLoaded = false;
 
@@ -67,14 +70,14 @@ export default class ExperienceService {
                 MESSAGE: {
                     id: 'message',
                     name: 'Mensaje enviado',
-                    xp: 5,
+                    xp: 15,
                     cooldownMs: 0, // Sin cooldown
                     enabled: true
                 },
                 FIRST_MESSAGE_DAY: {
                     id: 'first_message_day',
-                    name: 'Primer mensaje del día',
-                    xp: 20,
+                    name: 'Primer mensaje del día (Check-in)',
+                    xp: 50,
                     cooldownMs: 0,
                     enabled: true
                 },
@@ -166,7 +169,10 @@ export default class ExperienceService {
                         achievements: userData.achievements || [],
                         achievementStats: userData.achievementStats || {},
                         activityHistory: userData.activityHistory || {},
-                        watchTimeMinutes: userData.watchTimeMinutes || 0
+                        watchTimeMinutes: userData.watchTimeMinutes || 0,
+                        monthly: userData.monthly || null,
+                        isFollower: userData.isFollower !== undefined ? userData.isFollower : null,
+                        lastFollowerCheck: userData.lastFollowerCheck || null
                     });
                 });
             }
@@ -300,10 +306,14 @@ export default class ExperienceService {
         }
 
         // 2. Evaluar XP ganado de cada fuente usando la Fábrica
+        const today = this.streakManager.getCurrentDay();
+        const todayMessages = userData.activityHistory?.[today]?.messages || 0;
+
         const evaluationState = {
             isIgnoredForBonus: ignoredForBonus,
             isFirstMessageOfDay: !this.dailyFirstMessage.has(lowerUser),
-            streakBonusAwarded: streakResult.bonusAwarded
+            streakBonusAwarded: streakResult.bonusAwarded,
+            todayMessages
         };
 
         const evaluation = this.xpEvaluator.evaluateMessage(context, evaluationState);
@@ -335,7 +345,6 @@ export default class ExperienceService {
         userData.bestStreak = streakResult.bestStreak || userData.bestStreak || 0;
 
         // Registrar actividad diaria para heatmap
-        const today = this.streakManager.getCurrentDay();
         if (!userData.activityHistory) {
             userData.activityHistory = {};
         }
@@ -344,6 +353,14 @@ export default class ExperienceService {
         }
         userData.activityHistory[today].messages += 1;
         userData.activityHistory[today].xp += totalXP;
+
+        // Actualizar bolsa mensual (Lazy reset si cambió el mes)
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        if (!userData.monthly || userData.monthly.month !== currentMonth) {
+            userData.monthly = { month: currentMonth, xp: 0, watchTime: 0, messages: 0 };
+        }
+        userData.monthly.xp = (userData.monthly.xp || 0) + totalXP;
+        userData.monthly.messages = (userData.monthly.messages || 0) + 1;
 
         // Recalcular nivel
         const newLevel = this.levelCalculator.calculateLevel(userData.xp);
@@ -413,7 +430,13 @@ export default class ExperienceService {
                 achievementStats: {},
                 activityHistory: {}, // { "YYYY-MM-DD": { messages: N, xp: N } }
                 watchTimeMinutes: 0,
-                watchTimeLog: {}
+                watchTimeLog: {},
+                monthly: {
+                    month: new Date().toISOString().slice(0, 7),
+                    xp: 0,
+                    watchTime: 0,
+                    messages: 0
+                }
             });
         }
 
@@ -517,11 +540,31 @@ export default class ExperienceService {
      * @returns {Object} Información de XP
      */
     getUserXPInfo(username) {
-        const userData = this.getUserData(username.toLowerCase());
+        const lowerUser = username.toLowerCase();
+        const userData = this.getUserData(lowerUser);
         const progress = this.levelCalculator.getLevelProgress(userData.xp, userData.level);
 
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const monthlyData = (userData.monthly && userData.monthly.month === currentMonth)
+            ? userData.monthly
+            : { xp: 0, watchTime: 0, messages: 0 };
+
+        // Calcular posición en el ranking mensual
+        let monthlyRank = null;
+        if (monthlyData.xp > 0) {
+            const ignored = this._getIgnoredTopUsers();
+            const monthlySorted = Array.from(this.usersXP.entries())
+                .filter(([u, d]) => !ignored.includes(u.toLowerCase()) && d.monthly && d.monthly.month === currentMonth && (d.monthly.xp || 0) > 0)
+                .sort((a, b) => (b[1].monthly?.xp || 0) - (a[1].monthly?.xp || 0));
+
+            const idx = monthlySorted.findIndex(([u]) => u.toLowerCase() === lowerUser);
+            if (idx !== -1) {
+                monthlyRank = idx + 1;
+            }
+        }
+
         return {
-            username: username.toLowerCase(),
+            username: lowerUser,
             xp: userData.xp,
             level: userData.level,
             title: this.levelCalculator.getLevelTitle(userData.level),
@@ -529,7 +572,11 @@ export default class ExperienceService {
             streakDays: userData.streakDays || 0,
             streakMultiplier: this.streakManager.getStreakMultiplier(userData.streakDays || 0),
             totalMessages: userData.totalMessages,
-            achievements: userData.achievements
+            achievements: userData.achievements,
+            monthlyXP: monthlyData.xp,
+            monthlyWatchTime: monthlyData.watchTime || 0,
+            monthlyRank,
+            currentMonth
         };
     }
 
@@ -575,14 +622,97 @@ export default class ExperienceService {
     }
 
     /**
-     * Obtiene el leaderboard de XP / Nivel
-     * @param {number} limit - Cantidad de usuarios a retornar
-     * @returns {Array} Lista ordenada de usuarios
+     * Comprueba si un usuario es seguidor del canal de Twitch
+     * Utiliza caché en memoria (TTL de 6 horas) y la API pública de DecAPI
+     * @param {string} username - Nombre de usuario
+     * @returns {Promise<boolean>} true si es seguidor o si la verificación está desactivada
      */
-    getXPLeaderboard(limit = 10) {
+    async isUserFollower(username) {
+        if (!username) return false;
+        const lower = username.toLowerCase();
+
+        // Si la verificación de seguidores está desactivada en config, permitir a todos
+        if (this.config.REQUIRE_FOLLOWER_FOR_TOPS === false) {
+            return true;
+        }
+
+        // Si es bot o usuario ignorado, descartar directamente
+        if (this._getIgnoredTopUsers().includes(lower)) {
+            return false;
+        }
+
+        // 1. Comprobar caché en memoria (TTL: 6 horas = 21600000 ms)
+        const CACHE_TTL = 6 * 60 * 60 * 1000;
+        const cached = this.followerCache.get(lower);
+        if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+            return cached.isFollower;
+        }
+
+        // 2. Comprobar datos guardados en el perfil de usuario si ya fue validado recientemente
+        const userData = this.getUserData(lower);
+        if (typeof userData.isFollower === 'boolean' && userData.lastFollowerCheck && (Date.now() - userData.lastFollowerCheck < CACHE_TTL)) {
+            this.followerCache.set(lower, { isFollower: userData.isFollower, timestamp: userData.lastFollowerCheck });
+            return userData.isFollower;
+        }
+
+        // 3. Consultar IVR API Subage/Followage (devuelve followedAt: "ISO Date" o null)
+        try {
+            const channel = (this.config.TWITCH_CHANNEL || this.config.SPECIAL_USER?.username || 'mithands').toLowerCase();
+            const response = await fetch(`https://api.ivr.fi/v2/twitch/subage/${lower}/${channel}`);
+
+            if (response.ok) {
+                const data = await response.json();
+                // data.followedAt es un string con la fecha si es seguidor, o null si NO sigue al canal
+                const isFollower = Boolean(data && data.followedAt);
+
+                // Guardar en caché y en datos del usuario
+                this.followerCache.set(lower, { isFollower, timestamp: Date.now() });
+                userData.isFollower = isFollower;
+                userData.lastFollowerCheck = Date.now();
+
+                if (this.config.DEBUG) {
+                    console.log(`📡 [FollowerCheck] ${lower}: ${isFollower ? '✅ ES SEGUIDOR' : '❌ NO SIGUE'} (IVR: followedAt=${data?.followedAt || 'null'})`);
+                }
+
+                return isFollower;
+            }
+        } catch (error) {
+            console.warn(`⚠️ Error al verificar seguidor vía IVR para ${lower}:`, error);
+        }
+
+        // Fallback: Si la API no responde, usar el último estado conocido
+        return userData.isFollower === true;
+    }
+
+    /**
+     * Comprobación síncrona en caché de seguidor (para UI rápida)
+     * @param {string} username 
+     * @returns {boolean}
+     */
+    isUserFollowerCached(username) {
+        if (!username) return false;
+        if (this.config.REQUIRE_FOLLOWER_FOR_TOPS === false) return true;
+        const lower = username.toLowerCase();
+        if (this._getIgnoredTopUsers().includes(lower)) return false;
+        if (this.followerCache.has(lower)) {
+            return this.followerCache.get(lower).isFollower;
+        }
+        const userData = this.getUserData(lower);
+        if (typeof userData.isFollower === 'boolean') {
+            return userData.isFollower;
+        }
+        return true;
+    }
+
+    /**
+     * Obtiene el leaderboard de XP / Nivel (Solo Seguidores)
+     * @param {number} limit - Cantidad de usuarios a retornar
+     * @returns {Promise<Array>} Lista ordenada de usuarios seguidores
+     */
+    async getXPLeaderboard(limit = 10) {
         const ignoredUsers = this._getIgnoredTopUsers();
 
-        const users = Array.from(this.usersXP.entries())
+        const sortedCandidates = Array.from(this.usersXP.entries())
             .filter(([username]) => !ignoredUsers.includes(username.toLowerCase()))
             .map(([username, data]) => ({
                 username,
@@ -590,50 +720,111 @@ export default class ExperienceService {
                 level: data.level || 1,
                 title: this.levelCalculator.getLevelTitle(data.level || 1)
             }))
-            .sort((a, b) => b.xp - a.xp)
-            .slice(0, limit);
+            .sort((a, b) => b.xp - a.xp);
+
+        const users = [];
+        for (const entry of sortedCandidates) {
+            const isFollower = await this.isUserFollower(entry.username);
+            if (isFollower) {
+                users.push(entry);
+                if (users.length >= limit) break;
+            }
+        }
 
         return users;
     }
 
     /**
-     * Obtiene el leaderboard de Tiempo de visualización (Lurk / Watch Time)
+     * Obtiene el leaderboard de Tiempo de visualización (Lurk / Watch Time) (Solo Seguidores)
      * @param {number} limit - Cantidad de usuarios a retornar
-     * @returns {Array} Lista ordenada de usuarios por tiempo acumulado
+     * @returns {Promise<Array>} Lista ordenada de usuarios seguidores por tiempo acumulado
      */
-    getWatchTimeLeaderboard(limit = 10) {
+    async getWatchTimeLeaderboard(limit = 10) {
         const ignoredUsers = this._getIgnoredTopUsers();
 
-        const users = Array.from(this.usersXP.entries())
+        const sortedCandidates = Array.from(this.usersXP.entries())
             .filter(([username, data]) => !ignoredUsers.includes(username.toLowerCase()) && (data.watchTimeMinutes || 0) > 0)
             .map(([username, data]) => ({
                 username,
                 minutes: data.watchTimeMinutes || 0,
                 formatted: this._formatWatchTime(data.watchTimeMinutes || 0)
             }))
-            .sort((a, b) => b.minutes - a.minutes)
-            .slice(0, limit);
+            .sort((a, b) => b.minutes - a.minutes);
+
+        const users = [];
+        for (const entry of sortedCandidates) {
+            const isFollower = await this.isUserFollower(entry.username);
+            if (isFollower) {
+                users.push(entry);
+                if (users.length >= limit) break;
+            }
+        }
 
         return users;
     }
 
     /**
-     * Obtiene el leaderboard de Rachas de días activos
+     * Obtiene el leaderboard de Rachas de días activos (Solo Seguidores)
      * @param {number} limit - Cantidad de usuarios a retornar
-     * @returns {Array} Lista ordenada de usuarios por racha activa
+     * @returns {Promise<Array>} Lista ordenada de usuarios seguidores por racha activa
      */
-    getStreakLeaderboard(limit = 10) {
+    async getStreakLeaderboard(limit = 10) {
         const ignoredUsers = this._getIgnoredTopUsers();
 
-        const users = Array.from(this.usersXP.entries())
+        const sortedCandidates = Array.from(this.usersXP.entries())
             .filter(([username, data]) => !ignoredUsers.includes(username.toLowerCase()) && (data.streakDays || 0) > 0)
             .map(([username, data]) => ({
                 username,
                 streakDays: data.streakDays || 0,
                 bestStreak: data.bestStreak || data.streakDays || 0
             }))
-            .sort((a, b) => b.streakDays - a.streakDays)
-            .slice(0, limit);
+            .sort((a, b) => b.streakDays - a.streakDays);
+
+        const users = [];
+        for (const entry of sortedCandidates) {
+            const isFollower = await this.isUserFollower(entry.username);
+            if (isFollower) {
+                users.push(entry);
+                if (users.length >= limit) break;
+            }
+        }
+
+        return users;
+    }
+
+    /**
+     * Obtiene el leaderboard de la Liga del Mes actual (Solo Seguidores)
+     * @param {number} limit - Cantidad de usuarios a retornar
+     * @returns {Promise<Array>} Lista ordenada de usuarios en la temporada del mes
+     */
+    async getMonthlyXPLeaderboard(limit = 10) {
+        const ignoredUsers = this._getIgnoredTopUsers();
+        const currentMonth = new Date().toISOString().slice(0, 7);
+
+        const sortedCandidates = Array.from(this.usersXP.entries())
+            .filter(([username, data]) => {
+                if (ignoredUsers.includes(username.toLowerCase())) return false;
+                const monthly = data.monthly;
+                return monthly && monthly.month === currentMonth && (monthly.xp || 0) > 0;
+            })
+            .map(([username, data]) => ({
+                username,
+                xp: data.monthly.xp || 0,
+                level: data.level || 1,
+                title: this.levelCalculator.getLevelTitle(data.level || 1),
+                watchTime: data.monthly.watchTime || 0,
+                messages: data.monthly.messages || 0
+            }))
+            .sort((a, b) => b.xp - a.xp);
+
+        const users = [];
+        for (const entry of sortedCandidates) {
+            const isFollower = await this.isUserFollower(entry.username);
+            if (isFollower) {
+                users.push(entry);
+                if (users.length >= limit) break;
+            }
+        }
 
         return users;
     }
@@ -685,7 +876,7 @@ export default class ExperienceService {
         if (!chatters || !Array.isArray(chatters)) return;
 
         let updatedCount = 0;
-        const xpPerMinute = 0.5;
+        const xpPerMinute = 2.0; // 2 XP por minuto (120 XP / hora de watch time)
         const totalXP = Math.floor(minutes * xpPerMinute);
 
         chatters.forEach(username => {
@@ -725,6 +916,14 @@ export default class ExperienceService {
 
             userData.activityHistory[today].watchTime += minutes;
             userData.activityHistory[today].xp = (userData.activityHistory[today].xp || 0) + totalXP;
+
+            // Actualizar bolsa mensual
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            if (!userData.monthly || userData.monthly.month !== currentMonth) {
+                userData.monthly = { month: currentMonth, xp: 0, watchTime: 0, messages: 0 };
+            }
+            userData.monthly.watchTime = (userData.monthly.watchTime || 0) + minutes;
+            userData.monthly.xp = (userData.monthly.xp || 0) + totalXP;
 
             this.persistence.markDirty(lowerUser);
             updatedCount++;

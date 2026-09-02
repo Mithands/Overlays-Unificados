@@ -343,4 +343,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sincronización periódica de respaldo cada 45 segundos
     setInterval(() => seService.fetchHistory(), 45000);
+
+    // Conectar con el Master Control Dock (0 ms)
+    const handleDockMessage = (msg) => {
+        if (!msg || !msg.type) return;
+
+        // 1. Detección de Modo Calibración / Movimiento en Vivo desde Master Dock
+        if (msg.type === 'widget:calibrationPreview') {
+            if (msg.widgetId === 'seguidores') {
+                if (msg.active) {
+                    if (rotationTimer) clearTimeout(rotationTimer);
+                    showCard('follower');
+                } else {
+                    showCard('none');
+                    startRotationCycle();
+                }
+            }
+        } else if (msg.type === 'dock:transform' && msg.data && msg.data.widgetId === 'seguidores') {
+            if (rotationTimer) clearTimeout(rotationTimer);
+            showCard('follower');
+        } else if (msg.type === 'dock:testEvent' && msg.data) {
+            if (msg.data.event === 'follow') {
+                updateUI('follower', msg.data.username || 'NuevoSeguidor');
+                triggerLiveAlert('follower');
+            } else if (msg.data.event === 'sub') {
+                updateUI('subscriber', msg.data.username || 'NuevoSub', 'TIER 1');
+                triggerLiveAlert('subscriber');
+            }
+        }
+    };
+
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            const bus = new BroadcastChannel('stream_master_dock_bus');
+            bus.onmessage = (e) => handleDockMessage(e.data);
+        } catch (e) {}
+    }
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'mithands_dock_event' && e.newValue) {
+            try {
+                handleDockMessage(JSON.parse(e.newValue));
+            } catch (err) {}
+        }
+    });
+
+    window.addEventListener('message', (e) => {
+        if (e.data && e.data.type) {
+            handleDockMessage(e.data);
+        }
+    });
 });

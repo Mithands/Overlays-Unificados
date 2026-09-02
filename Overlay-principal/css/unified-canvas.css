@@ -1,0 +1,95 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background-color: transparent !important;
+    user-select: none;
+    position: relative;
+}
+
+/* Master Canvas 1920x1080 */
+#master-canvas {
+    width: 1920px;
+    height: 1080px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Base Widget Slot con origen absoluto 0,0 */
+.widget-slot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: none;
+    background: transparent;
+    pointer-events: auto;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+    transform-origin: top left;
+    will-change: transform, opacity;
+}
+
+/* Dimensiones base de cada Widget */
+
+/* 1. Chat & XP Overlay */
+#slot-chat {
+    width: 480px;
+    height: 850px;
+    transform: translate(1410px, 200px);
+}
+
+/* 2. Metas Bar */
+#slot-metas {
+    width: 540px;
+    height: 220px;
+    transform: translate(30px, 30px);
+}
+
+/* 3. Últimos Seguidores */
+#slot-seguidores {
+    width: 480px;
+    height: 240px;
+    transform: translate(30px, 850px);
+}
+
+/* 4. Votaciones */
+#slot-votacion {
+    width: 1000px;
+    height: 680px;
+    transform: translate(40px, 200px);
+}
+
+/* 5. TTS Overlay */
+#slot-tts {
+    width: 350px;
+    height: 120px;
+    transform: translate(1520px, 30px);
+    opacity: 0.9;
+}
+
+/* 6. Alertas de Logros Cyberpunk Standalone */
+#slot-logros {
+    width: 600px;
+    height: 300px;
+    transform: translate(1280px, 30px);
+}
+
+/* Modo de Calibración / Ajuste Visual en Vivo (Activo por 6 segundos al mover) */
+.widget-slot.widget-calibrating {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Cinematic Hide Mode */
+.cinematic-active {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}

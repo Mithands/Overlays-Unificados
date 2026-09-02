@@ -24,6 +24,18 @@ export default class AudioManager {
 
         this.initialized = false;
 
+        // Cargar volumen guardado del Master Dock
+        try {
+            const saved = localStorage.getItem('mithands_master_dock_state_v1');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.audio && parsed.audio.chatSfxVolume !== undefined) {
+                    this.config.AUDIO_VOLUME = (parseFloat(parsed.audio.chatSfxVolume) || 100) / 100;
+                    if (parsed.audio.chatSfxMuted) this.config.AUDIO_VOLUME = 0;
+                }
+            }
+        } catch (e) {}
+
         // Setup listeners
         this.init();
     }
@@ -35,11 +47,49 @@ export default class AudioManager {
         if (this.initialized) return;
 
         this._setupEventListeners();
+        this._setupDockListeners();
         this.initialized = true;
 
         if (this.config.DEBUG) {
             console.log('🔊 AudioManager initialized and listening to events');
         }
+    }
+
+    _setupDockListeners() {
+        const handleDockMsg = (msg) => {
+            if (!msg || !msg.type) return;
+            if ((msg.type === 'dock:sfxControl' || msg.type === 'dock:ttsControl') && msg.data) {
+                if (msg.data.chatSfxVolume !== undefined) {
+                    this.config.AUDIO_VOLUME = (parseFloat(msg.data.chatSfxVolume) || 0) / 100;
+                }
+                if (msg.data.chatSfxMuted !== undefined) {
+                    if (msg.data.chatSfxMuted) this.config.AUDIO_VOLUME = 0;
+                }
+                if (msg.data.action === 'testChatSound') {
+                    this.playChatMessage();
+                }
+            } else if (msg.type === 'dock:syncAll' && msg.data && msg.data.audio) {
+                if (msg.data.audio.chatSfxVolume !== undefined) {
+                    this.config.AUDIO_VOLUME = (parseFloat(msg.data.audio.chatSfxVolume) || 0) / 100;
+                    if (msg.data.audio.chatSfxMuted) this.config.AUDIO_VOLUME = 0;
+                }
+            }
+        };
+
+        if (typeof BroadcastChannel !== 'undefined') {
+            try {
+                const bus = new BroadcastChannel('stream_master_dock_bus');
+                bus.onmessage = (event) => handleDockMsg(event.data);
+            } catch (e) {}
+        }
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'mithands_dock_event' && e.newValue) {
+                try {
+                    handleDockMsg(JSON.parse(e.newValue));
+                } catch (err) {}
+            }
+        });
     }
 
     _setupEventListeners() {
@@ -58,8 +108,6 @@ export default class AudioManager {
 
         // 4. Test sound
         EventManager.on('test:sound', () => this.playChatMessage());
-
-
 
         // 6. Reset session on stream start
         EventManager.on('stream:statusChanged', (isOnline) => {
@@ -97,7 +145,8 @@ export default class AudioManager {
         else if (level <= 20) soundFile = 'sounds/level20.mp3';
         else soundFile = 'sounds/level25.mp3'; // 21+
 
-        this._playSoundFile(soundFile);
+        // Reducido un 75% (factor 0.25) para calibrarlo al gusto del usuario
+        this._playSoundFile(soundFile, 0.25);
     }
 
     /**
@@ -110,16 +159,19 @@ export default class AudioManager {
     /**
      * Internal method to play a sound file
      * @param {string} path - Path to audio file
+     * @param {number} multiplier - Volume multiplier (default 1.0)
      */
-    _playSoundFile(path) {
+    _playSoundFile(path, multiplier = 1.0) {
         // strict volume check (0 volume = mute)
         if (!this.config.AUDIO_VOLUME && this.config.AUDIO_VOLUME !== 0) return;
 
         try {
-            // Check cache first to reuse Audio objects (optional optimization)
-            // For now, new Audio() is safer for overlapping sounds
+            const baseVol = Math.max(0, Math.min(1, this.config.AUDIO_VOLUME));
+            const finalVol = Math.max(0, Math.min(1, baseVol * multiplier));
+            if (finalVol <= 0) return;
+
             const audio = new Audio(path);
-            audio.volume = Math.max(0, Math.min(1, this.config.AUDIO_VOLUME)); // Clamp 0-1
+            audio.volume = finalVol; // Clamp 0-1
 
             const playPromise = audio.play();
 

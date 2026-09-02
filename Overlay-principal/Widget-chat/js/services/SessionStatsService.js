@@ -388,6 +388,9 @@ export default class SessionStatsService {
         if (lower.startsWith('justinfan')) return true;
         if (this.config.EXCLUDED_TOP_USERS && this.config.EXCLUDED_TOP_USERS.includes(lower)) return true;
         if (this.config.BLACKLISTED_USERS && this.config.BLACKLISTED_USERS.includes(lower)) return true;
+        if (this.experienceService && typeof this.experienceService.isUserFollowerCached === 'function') {
+            if (!this.experienceService.isUserFollowerCached(lower)) return true;
+        }
         return false;
     }
 

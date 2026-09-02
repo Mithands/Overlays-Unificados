@@ -52,6 +52,9 @@ const CONFIG = {
     // Habilitar/deshabilitar sistema de XP
     XP_SYSTEM_ENABLED: true,
 
+    // Requerir ser seguidor de Twitch para aparecer en los rankings públicos y Tops
+    REQUIRE_FOLLOWER_FOR_TOPS: true,
+
     // GitHub Gist para almacenamiento de XP
     // IMPORTANTE: Crea un Gist privado y obtén un Personal Access Token
     // con permisos de "gist" en https://github.com/settings/tokens
@@ -125,7 +128,11 @@ const CONFIG = {
         'wizebot',
         'tangiabot',
         'botrixoficial',
-        'streamroutine_bot'
+        'streamroutine_bot',
+        'commanderroot',
+        'electricallongarm',
+        'lurxx',
+        'feet'
     ],
 
     // Usuarios completamente excluidos (Bots de sistema)
@@ -139,7 +146,11 @@ const CONFIG = {
         'kofkstreambot',
         'kofistreambot',
         'nightbot',
-        'streamlabs'
+        'streamlabs',
+        'commanderroot',
+        'electricallongarm',
+        'lurxx',
+        'feet'
     ]
 };
 

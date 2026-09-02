@@ -7,9 +7,9 @@
   --bg-card: #18181c;
   --bg-input: #1f1f23;
   --bg-hover: #26262c;
-  --accent: #9146ff;
-  --accent-glow: rgba(145, 70, 255, 0.35);
-  --accent-hover: #772ce8;
+  --accent: #ff6600;
+  --accent-glow: rgba(255, 102, 0, 0.35);
+  --accent-hover: #ff8c00;
   --text-main: #efeff1;
   --text-muted: #adadb8;
   --border: #2d2d35;

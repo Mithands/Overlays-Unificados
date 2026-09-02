@@ -551,6 +551,67 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Sincronización bidireccional con el Master Control Dock de OBS (0 ms)
+  const handleMasterDockMsg = (msg) => {
+    if (!msg || !msg.type) return;
+    if (msg.type === 'dock:ttsControl' && msg.data) {
+      const { action, volume, muted, text } = msg.data;
+      if (action === 'volume') {
+        appSettings.volume = Math.max(0, Math.min(1.0, (parseFloat(volume) || 100) / 100));
+        if (elements.rangeVolume) elements.rangeVolume.value = appSettings.volume;
+        if (elements.valVolume) elements.valVolume.textContent = `${Math.round(appSettings.volume * 100)}%`;
+        tts.updateSettings({ volume: appSettings.volume });
+        saveSettings();
+        updateModules();
+      } else if (action === 'mute') {
+        appSettings.isMuted = Boolean(muted);
+        tts.setMute(appSettings.isMuted);
+        if (elements.btnToggleMute) {
+          if (appSettings.isMuted) {
+            elements.btnToggleMute.textContent = '🔇';
+            elements.btnToggleMute.classList.add('active-mute');
+          } else {
+            elements.btnToggleMute.textContent = '🔊';
+            elements.btnToggleMute.classList.remove('active-mute');
+          }
+        }
+        saveSettings();
+        updateModules();
+      } else if (action === 'skip') {
+        tts.skipCurrent();
+      } else if (action === 'test') {
+        tts.addToQueue({
+          username: 'Mithands Control',
+          displayName: 'Mithands Control',
+          color: '#00f0ff',
+          role: 'broadcaster',
+          message: text || '¡Hola Mithands, la consola de audio y voz está lista!'
+        });
+      }
+    }
+  };
+
+  if (typeof BroadcastChannel !== 'undefined') {
+    try {
+      const masterBus = new BroadcastChannel('stream_master_dock_bus');
+      masterBus.onmessage = (e) => handleMasterDockMsg(e.data);
+    } catch (e) {}
+  }
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'mithands_dock_event' && e.newValue) {
+      try {
+        handleMasterDockMsg(JSON.parse(e.newValue));
+      } catch (err) {}
+    }
+  });
+
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.type) {
+      handleMasterDockMsg(e.data);
+    }
+  });
+
   // Inicializar UI
   applySettingsToUI();
 

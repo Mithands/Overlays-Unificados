@@ -29,9 +29,9 @@ body {
 }
 
 .tts-bubble {
-  background: rgba(14, 14, 17, 0.92);
-  border: 2px solid #9146ff;
-  box-shadow: 0 8px 32px rgba(145, 70, 255, 0.4), inset 0 0 12px rgba(145, 70, 255, 0.15);
+  background: rgba(14, 14, 17, 0.94);
+  border: 2px solid #ff6600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   border-radius: 14px;
   padding: 14px 18px;
@@ -65,9 +65,10 @@ body {
 .role-badge {
   font-size: 10px;
   font-weight: 800;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
-  background: #9146ff;
+  background: linear-gradient(135deg, #ff8c00, #ff4500);
+  box-shadow: none;
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -76,8 +77,8 @@ body {
 .username {
   font-size: 16px;
   font-weight: 700;
-  color: #fff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  color: #ffaa33;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
 }
 
 /* Animación de Ondas de Voz */
